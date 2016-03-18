@@ -1,15 +1,14 @@
-# if [ $UID -ne 0 ];then
-# echo "this is not root"
-# else
-# echo "this is root"
-# fi
-## 数学运算
-# a=4
-# b=5
-# let result=$a+$b
-# echo $result
-#
-
+if [ $UID -ne 0 ];then
+echo "this is not root"
+else
+echo "this is root"
+fi
+# 数学运算
+>a=4
+b=5
+let result=$a+$b
+echo $result
+>fdfd
 # result=$[ a + b + 1 ]
 # echo $result
 #
