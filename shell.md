@@ -24,6 +24,7 @@ echo $result
 result=$(expr $a + 20 )
 echo $result
 # 标准输入输出以及标准错误
+>
 0标准输入
 1标准输出
 2标准错误
@@ -37,7 +38,7 @@ tee命令可以将stdout的一份副本保存到指定文件中，同时将另�
 cat fff* |tee /tmp/test |cat -n
 cat ffff* 2> /tmp/out
 cat -n /tmp/out
-
+>fdfd
  \>与>>不同，默认情况下 >==1> >>==1>> 如果要最佳到文件中需要在>>前面加上1或2
 
 ##从文件中读取数据
