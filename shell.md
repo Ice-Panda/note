@@ -1,13 +1,10 @@
->
 if [ $UID -ne 0 ];then
 echo "this is not root"
 else
 echo "this is root"
 fi
->
 
 # 数学运算
->
 a=4
 b=5
 let result=$a+$b
@@ -27,9 +24,7 @@ echo $result
 
 result=$(expr $a + 20 )
 echo $result
->
 # 标准输入输出以及标准错误
->
 0标准输入
 1标准输出
 2标准错误
@@ -45,7 +40,7 @@ cat ffff* 2> /tmp/out
 cat -n /tmp/out
 
 >与>>不同，默认情况下 >==1> >>==1>> 如果要最佳到文件中需要在>>前面加上1或2
->fdfd
+
 
 ##从文件中读取数据
 >
