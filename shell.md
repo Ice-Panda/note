@@ -4,10 +4,10 @@ echo "this is not root"
 else
 echo "this is root"
 fi
->fdfd
+>
 
 # 数学运算
->fdfd
+>
 a=4
 b=5
 let result=$a+$b
@@ -27,7 +27,7 @@ echo $result
 
 result=$(expr $a + 20 )
 echo $result
->fdfd
+>
 # 标准输入输出以及标准错误
 >
 0标准输入
