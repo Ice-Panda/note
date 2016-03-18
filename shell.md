@@ -1,4 +1,3 @@
->
 if [ $UID -ne 0 ];then
 echo "this is not root"
 else
