@@ -1,10 +1,11 @@
->fdfd
+>
 if [ $UID -ne 0 ];then
 echo "this is not root"
 else
 echo "this is root"
 fi
 >fdfd
+
 # 数学运算
 >fdfd
 a=4
