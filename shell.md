@@ -1,31 +1,26 @@
-if [ $UID -ne 0 ];then
+>if [ $UID -ne 0 ];then
 echo "this is not root"
 else
 echo "this is root"
 fi
+>fdfd
 # 数学运算
->
-a=4
+>a=4
 b=5
 let result=$a+$b
 echo $result
 
-
 result=$[ a + b + 1 ]
 echo $result
-
 
 result=$[ $a + 10 ]
 echo $result
 
-
 result=$(( a + 15 ))
 echo $result
 
-
 result=`expr 3 + 4`
 echo $result
-
 
 result=$(expr $a + 20 )
 echo $result
