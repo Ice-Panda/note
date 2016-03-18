@@ -3,7 +3,6 @@ echo "this is not root"
 else
 echo "this is root"
 fi
-
 # 数学运算
 a=4
 b=5
@@ -39,11 +38,9 @@ cat fff* |tee /tmp/test |cat -n
 cat ffff* 2> /tmp/out
 cat -n /tmp/out
 
->与>>不同，默认情况下 >==1> >>==1>> 如果要最佳到文件中需要在>>前面加上1或2
-
+ \>与>>不同，默认情况下 >==1> >>==1>> 如果要最佳到文件中需要在>>前面加上1或2
 
 ##从文件中读取数据
->
 cat -n < sever.py
 exec 可以创建文件描述符读取文件（读取模式）
 echo 'hello test' > test.txt
@@ -58,10 +55,8 @@ exec还可以创建一个追加模式的文件描述符
 exec 5>> input.txt
 echo new line append >&5
 cat input.txt
->fdfd
 
 ## 数组
->
 定义数组
 array_var=(1 2 3)
 echo ${array_var[1]}
@@ -85,9 +80,7 @@ echo ${ass_array[*]}
 echo ${!ass_array[*]}
 临时定义命令别名，可以在.bashrc中定义
 alias you='ls'
->fdfd
 ## 获取终端信息tput和stty两款终端处理工具
->
 获取行数和列数
 tput cols
 tput lines
@@ -102,7 +95,6 @@ echo $password
 echo Password read.
 >fdfd
 ## 获取，设置日期和延时
->
 日期格式化 以+开头加上格式化参数
 date +%s
 date "+%s %B"
@@ -131,109 +123,106 @@ echo -n $count;
 else exit 0;
 fi
 done
->fdfd
 ## 脚本调试
->
 bash -x script.gzip, deflate, lzma, sdchsh
->fdfd
 ## 函数和参数
-# function fname()
-# {
-# echo '调用fname';
-# }
-# # 或者
-# fname()
-# {
-# echo '调用fname';
-# }
-# fname
-# 给函数传递参数 fname arg1 arg2;
-# fname()
-# {
-# echo $1,$2;#访问第一个和第二个参数
-# echo "$@";#以列表方式一次性打印所有参数，常用到这个方法获取参数
-# echo "$*";#类似于$@,但是参数被作为单个实体，很少用到
-# return 0;
-# }
-# $1第1个参数
-# $2第2个参数
-# $n第n个参数
-# "$@"被扩展成"$1" "$2" "$3" .....
-# fname 'arg1' 'arg2'
-# 递归调用
-# F()
-# {
-# echo $1;
-# F hello;
-# sleep 3;
-# }
-# 获取函数或命令的返回值
-# echo $? #0表示成功，非0表示失败
-# lll 2> /dev/null
-# 检测上一个命令是否执行成功
-# if [ $? -eq 0 ];
-# then
-# echo "executed successfully"
-# else
-# echo "executed failed"
-# fi
-# read命令不用按enter键
-# read -n 2 var #读取2个字符存入var中
-# echo $var
-# read -s var #无回显方式读取密码
-# read -p 'enter input:' var #显示提示信息
-# read -t 2 var #在固定时间内读取
+function fname()
+{
+echo '调用fname';
+}
+或者
+fname()
+{
+echo '调用fname';
+}
+fname
+给函数传递参数 fname arg1 arg2;
+fname()
+{
+echo $1,$2;#访问第一个和第二个参数
+echo "$@";#以列表方式一次性打印所有参数，常用到这个方法获取参数
+echo "$*";#类似于$@,但是参数被作为单个实体，很少用到
+return 0;
+}
+$1第1个参数
+$2第2个参数
+$n第n个参数
+"$@"被扩展成"$1" "$2" "$3" .....
+fname 'arg1' 'arg2'
+递归调用
+F()
+{
+echo $1;
+F hello;
+sleep 3;
+}
+获取函数或命令的返回值
+echo $? #0表示成功，非0表示失败
+lll 2> /dev/null
+检测上一个命令是否执行成功
+if [ $? -eq 0 ];
+then
+echo "executed successfully"
+else
+echo "executed failed"
+fi
+read命令不用按enter键
+read -n 2 var #读取2个字符存入var中
+echo $var
+read -s var #无回显方式读取密码
+read -p 'enter input:' var #显示提示信息
+read -t 2 var #在固定时间内读取
 ## 比较与测试
-# if condition;
-# then
-# commands;
-# else if condition;
-# then
-# commands;
-# else
-# commands;
-# fi
+if condition;
+then
+commands;
+else if condition;
+then
+commands;
+else
+commands;
+fi
 ## 算数比较
-# -eq -gt -lt -ge -le -ne
-# [ $var1 -eq 3 -a $var2 -eq 4] -a表示逻辑与
-# [ $var1 -eq 3 -o $var2 -eq 4] -o表示逻辑或
+-eq -gt -lt -ge -le -ne
+[ $var1 -eq 3 -a $var2 -eq 4] -a表示逻辑与
+[ $var1 -eq 3 -o $var2 -eq 4] -o表示逻辑或
 ## 文件系统测试
-# -f 如果给定的变量包含正常的文件路径和文件名，返回真
-# -x 给定的变量是一个可执行文件
-# -d 给定的变量是一个目录
-# -e 给定的变量文件存在
-# -c 给定的变量包含的是一个字符设备文件路径
-# -b 给定的变量包含的是一个块设备文件的路径
-# -w 给定的变脸包含的文件可写
-# -r 给定的变量包含的文件可读
-# -L 给定的变量包含的是一个符号链接
+-f 如果给定的变量包含正常的文件路径和文件名，返回真
+-x 给定的变量是一个可执行文件
+-d 给定的变量是一个目录
+-e 给定的变量文件存在
+-c 给定的变量包含的是一个字符设备文件路径
+-b 给定的变量包含的是一个块设备文件的路径
+-w 给定的变脸包含的文件可写
+-r 给定的变量包含的文件可读
+-L 给定的变量包含的是一个符号链接
 ## 字符串比较
-# 字符串比较时，最好用中括号，因为有时候单个括号会产生错误
-# [[ $str1 = $str2 ]]或者[[ $str1 == $str2 ]]比较是否相等
-# [[ $str1 > $str2 ]] str1字母序大于str2
-# [[ -z $str1 ]] str1包含的是空字符串
-# [[ -n $str1 ]] str1包含的是非空字符串
-# 使用&& 和 ||可以链接多个条件
-# if [[ -n $str1 ]] && [[ -z $str2 ]];
-# then
-# commands;
-# fi
+字符串比较时，最好用中括号，因为有时候单个括号会产生错误
+[[ $str1 = $str2 ]]或者[[ $str1 == $str2 ]]比较是否相等
+[[ $str1 > $str2 ]] str1字母序大于str2
+[[ -z $str1 ]] str1包含的是空字符串
+[[ -n $str1 ]] str1包含的是非空字符串
+使用&& 和 ||可以链接多个条件
+if [[ -n $str1 ]] && [[ -z $str2 ]];
+then
+commands;
+fi
 ## test命令可以用来执行条件检测，他可以避免过多的使用括号
-# if test $var -eq 0;then echo "True";fi
-## 命令
-### cat
-# cat file1 file2 file3 将文件链接起来打印
-# echo 'adsfad' |cat - test.txt 可以将标准输入和文件链接起来 - 被作为stdin文本的文件名
-# cat -s test.txt 不打印连续空白的行
-# cat -n test.txt 加上行号
-## script和scriptreplay
-# script -t 2> time.log -a output.session开始录制
-# time.log用于存储时序信息，描述一个命令在何时运行，output.session 用于存储命令输出
-# -t选项用于将时序数据导入stderr 2> 将错误信息重定向到time.log
-# CTRL+D 结束录制
-# scriptreplay time.log output.session 播放
+if test $var -eq 0;then echo "True";fi
+# 命令
+## cat
+cat file1 file2 file3 将文件链接起来打印
+echo 'adsfad' |cat - test.txt 可以将标准输入和文件链接起来 - 被作为stdin文本的文件名
+cat -s test.txt 不打印连续空白的行
+cat -n test.txt 加上行号
+# script和scriptreplay
+script -t 2> time.log -a output.session开始录制
+time.log用于存储时序信息，描述一个命令在何时运行，output.session 用于存储命令输出
+-t选项用于将时序数据导入stderr 2> 将错误信息重定向到time.log
+CTRL+D 结束录制
+scriptreplay time.log output.session 播放
 ## 文件查找与文件列表
-## find
+### find
 # find base_path #列出当前目录及子目录下的所有文件和文件夹,他会从base_path位置开始向下查找
 # find -name "*.sh" -print #指定查找的文件名 -iname忽略大小写
 # find . \( -name "*.txt" -o -name "*.sh" \) #匹配多个条件
