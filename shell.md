@@ -4,132 +4,145 @@ else
 echo "this is root"
 fi
 # 数学运算
->a=4
+>
+a=4
 b=5
 let result=$a+$b
 echo $result
+
+
+result=$[ a + b + 1 ]
+echo $result
+
+
+result=$[ $a + 10 ]
+echo $result
+
+
+result=$(( a + 15 ))
+echo $result
+
+
+result=`expr 3 + 4`
+echo $result
+
+
+result=$(expr $a + 20 )
+echo $result
 >fdfd
-# result=$[ a + b + 1 ]
-# echo $result
-#
+# 标准输入输出以及标准错误
+>
+0标准输入
+1标准输出
+2标准错误
+ls + 2> /tmp/error
+ls + 2> /tmp/error 1> /tmp/stdout
+2>&1 将标准错误转为标准输出
+&>与上面一样
+ls  2>&1  /tmp/stdout
+ls  &> /tmp/stdout
+tee命令可以将stdout的一份副本保存到指定文件中，同时将另一份副本作为后续命令的stdin
+cat fff* |tee /tmp/test |cat -n
+cat ffff* 2> /tmp/out
+cat -n /tmp/out
 
-# result=$[ $a + 10 ]
-# echo $result
-#
+>与>>不同，默认情况下 >==1> >>==1>> 如果要最佳到文件中需要在>>前面加上1或2
+>fdfd
 
-# result=$(( a + 15 ))
-# echo $result
-#
-
-# result=`expr 3 + 4`
-# echo $result
-#
-
-# result=$(expr $a + 20 )
-# echo $result
-## 标准输入输出以及标准错误
-# 0标准输入
-# 1标准输出
-# 2标准错误
-# ls + 2> /tmp/error
-# ls + 2> /tmp/error 1> /tmp/stdout
-# 2>&1 将标准错误转为标准输出
-# &>与上面一样
-# ls  2>&1  /tmp/stdout
-# ls  &> /tmp/stdout
-# tee命令可以将stdout的一份副本保存到指定文件中，同时将另一份副本作为后续命令的stdin
-# cat fff* |tee /tmp/test |cat -n
-# cat ffff* 2> /tmp/out
-# cat -n /tmp/out
-#
-
-# >与>>不同，默认情况下 >==1> >>==1>> 如果要最佳到文件中需要在>>前面加上1或2
-#
-
-# 从文件中读取数据
-# cat -n < sever.py
-# exec 可以创建文件描述符读取文件（读取模式）
-# echo 'hello test' > test.txt
-# exec 3<test.txt
-# cat <&3
-# 再次读取文件描述符3时需要再次创建该描述符
-# exec也可以创建文件描述符用于写入(截断模式)
-# exec 4> output.txt
-# echo newline >&4
-# cat output.txt
-# exec还可以创建一个追加模式的文件描述符
-# exec 5>> input.txt
-# echo new line append >&5
-# cat input.txt
-#
+##从文件中读取数据
+>
+cat -n < sever.py
+exec 可以创建文件描述符读取文件（读取模式）
+echo 'hello test' > test.txt
+exec 3<test.txt
+cat <&3
+再次读取文件描述符3时需要再次创建该描述符
+exec也可以创建文件描述符用于写入(截断模式)
+exec 4> output.txt
+echo newline >&4
+cat output.txt
+exec还可以创建一个追加模式的文件描述符
+exec 5>> input.txt
+echo new line append >&5
+cat input.txt
+>fdfd
 
 ## 数组
-# 定义数组
-# array_var=(1 2 3)
-# echo ${array_var[1]}
-# array_var[0]='test0'
-# array_var[1]='test1'
-# array_var[2]='test2'
-# array_var[3]='test3'
-# array_var[4]='test4'
-# array_var[5]='test5'
-# echo ${array_var[0]}
-# index=3
-# echo ${array_var[$index]}
-# echo ${array_var[*]}
-# echo ${array_var[@]}
-# 关联数组，关联数组中可以用任意的文本作为数组索引，首先需要使用声明语句将一个变量名声明为关联数组
-# declare -A ass_array
-# ass_array=([index]=11 [sec]=22)
-# echo ${ass_array[sec]}
-# echo ${ass_array[*]}
-# 获取数组索引列表
-# echo ${!ass_array[*]}
-# 临时定义命令别名，可以在.bashrc中定义
-# alias you='ls'
+>
+定义数组
+array_var=(1 2 3)
+echo ${array_var[1]}
+array_var[0]='test0'
+array_var[1]='test1'
+array_var[2]='test2'
+array_var[3]='test3'
+array_var[4]='test4'
+array_var[5]='test5'
+echo ${array_var[0]}
+index=3
+echo ${array_var[$index]}
+echo ${array_var[*]}
+echo ${array_var[@]}
+关联数组，关联数组中可以用任意的文本作为数组索引，首先需要使用声明语句将一个变量名声明为关联数组
+declare -A ass_array
+ass_array=([index]=11 [sec]=22)
+echo ${ass_array[sec]}
+echo ${ass_array[*]}
+获取数组索引列表
+echo ${!ass_array[*]}
+临时定义命令别名，可以在.bashrc中定义
+alias you='ls'
+>fdfd
 ## 获取终端信息tput和stty两款终端处理工具
-# 获取行数和列数
-# tput cols
-# tput lines
-# 移动光标
-# tput cup 10 10
-# stty 输入密码不可见
-# echo -e "Enter password"
-# stty -echo
-# read password
-# stty echo
-# echo $password
-# echo Password read.
+>
+获取行数和列数
+tput cols
+tput lines
+移动光标
+tput cup 10 10
+stty 输入密码不可见
+echo -e "Enter password"
+stty -echo
+read password
+stty echo
+echo $password
+echo Password read.
+>fdfd
 ## 获取，设置日期和延时
-# 日期格式化 以+开头加上格式化参数
-# date +%s
-# date "+%s %B"
-# 计算一组命令所花费的时间
-# start=`date +%s`
-# sleep 1
-# end=`date +%s`
-# use=$(( end - start ))
-# let use=$end-$start
-# echo “运行了$use秒”
-# 测试
-# echo -n Count:
-# tput sc
-# count=0
-# while true;
-# do
-# if [ $count -lt 1 ];
-# then
-# let count++;
-# sleep 1;
-# # tput rc 回复光标位置
-# # tput ed 清楚光标位置到行尾之间的内容
-# tput rc;
-# tput ed;
-# echo -n $count;
-# else exit 0;
-# fi
-# done
-## 脚本调试bash -x script.gzip, deflate, lzma, sdchsh
+>
+日期格式化 以+开头加上格式化参数
+date +%s
+date "+%s %B"
+计算一组命令所花费的时间
+start=`date +%s`
+sleep 1
+end=`date +%s`
+use=$(( end - start ))
+let use=$end-$start
+echo “运行了$use秒”
+测试
+echo -n Count:
+tput sc
+count=0
+while true;
+do
+if [ $count -lt 1 ];
+then
+let count++;
+sleep 1;
+tput rc 回复光标位置
+tput ed 清楚光标位置到行尾之间的内容
+tput rc;
+tput ed;
+echo -n $count;
+else exit 0;
+fi
+done
+>fdfd
+## 脚本调试
+>
+bash -x script.gzip, deflate, lzma, sdchsh
+>fdfd
 ## 函数和参数
 # function fname()
 # {
@@ -385,5 +398,5 @@ echo $result
 # cut -c1-5#显示从第1到5个字符
 # cut -c1-5,6-10 --output-delimiter ","显示1-5 6-10两个字符串用","链接
 
-###sed进行文本替换
+###sed进行文本
 # sed 's/pattern/replace_string/' file或者cat file|sed 's/pattern/replace_string/'
