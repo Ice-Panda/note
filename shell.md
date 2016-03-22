@@ -493,48 +493,41 @@ wget -c url 可以断点续传<br>
 wget --mirror --convert-links www.example.com 可以下载整个网站<br>
 wget -r -N -l -k depth url,跟上面功能一样<br>
 
-###以纯文本形式下载网页lynx
-# lynx url -dump > response.txt #-dump 将网页以ascii编码形式保存到本地
+## 以纯文本形式下载网页lynx
+lynx url -dump > response.txt #-dump 将网页以ascii编码形式保存到本地
 
-###cURL支持http https ftp post cookie 认证 用户代理字符串 扩展头部 限速 文件大小限制等等
-# curl URL/file -c offset 从文件制定的偏移量开始下载
-# curl -c - URL 字段判断断点续传位置
-# curl http://example.com --cookie  'user=slyux,pass=back' 设置cookie
-# curl URL --user-agent "Mozilla/5.0" 设置用户代理
-# curl -H "HOST: www.slynux.com" -H "Accept-language: en" URL 设置http头
-# curl -I URL 只打印http头信息
-##以post方式获取网页数据
-# curl URL -d "username=test&pwd=pwd" 表示以post方式发送数据
+## cURL支持http https ftp post cookie 认证 用户代理字符串 扩展头部 限速 文件大小限制等等
+curl URL/file -c offset 从文件制定的偏移量开始下载<br>
+curl -c - URL 字段判断断点续传位置<br>
+curl http://example.com --cookie  'user=slyux,pass=back' 设置cookie<br>
+curl URL --user-agent "Mozilla/5.0" 设置用户代理<br>
+curl -H "HOST: www.slynux.com" -H "Accept-language: en" URL 设置http头<br>
+curl -I URL 只打印http头信息<br>
+### 以post方式获取网页数据
+curl URL -d "username=test&pwd=pwd" 表示以post方式发送数据
 
+# 网络设置
+## ifconfig
+ifconfig wlan0 192.168.1.1 设置wlan0的ip<br>
+ifconfig wlan0 192.168.1.100 netmask 255.255.255.0<br>
+dhclient eth0 如果链接到的是自动分配ip的网络,这样可以快速配置<br>
+ifconfig eth0 hw ether 00:1c:bf:87:35进行mac地址欺骗<br>
+## fping查询网络内存活的主机
+fping -a 192.168.1.1/24 -g 2> /dev/null
+## ssh链接远程主机并运行命令
+ssh user@host 'command1;command2;command3'<br>
+ssh无密码登陆<br>
+ssh-keygen -t rsa<br>
 
-####无网不利
-###网络设置
-##ifconfig
-# ifconfig wlan0 192.168.1.1 设置wlan0的ip
-# ifconfig wlan0 192.168.1.100 netmask 255.255.255.0
-# dhclient eth0 如果链接到的是自动分配ip的网络,这样可以快速配置
-# ifconfig eth0 hw ether 00:1c:bf:87:35进行mac地址欺骗
-##fping查询网络内存活的主机
-# fping -a 192.168.1.1/24 -g 2> /dev/null
-##ssh链接远程主机并运行命令
-# ssh user@host 'command1;command2;command3'
-# ssh无密码登陆
-# ssh-keygen -t rsa
+# 收集进程信息
+## ps是收集进程信息最重要的工具
+- ps -f显示多列信息
+- ps -e 获取系统每个进程信息或者使用ps -ax
+- ps -ef或者ps -axf
+- ps -o field1.filed2 可以定义显示哪些列信息
+- ps -eo pcpu,comm
+- -o 参数 pcpu cpu占用率,pid进程id,ppid父进程id,pmem内存使用率,comm可执行文件名
+- cmd简单命令,user启动进程的用户,nice优先级,time累计cpu时间,etime进程启动后流失的时间,
+- tty所关联的tty设备,euid有效的用户ID,stat进程状态
+- ps --sort -field1,+filed2,field3...按列排序
 
-####管理重任
-###收集进程信息
-##ps是收集进程信息最重要的工具
-# ps -f显示多列信息
-# ps -e 获取系统每个进程信息或者使用ps -ax
-# ps -ef或者ps -axf
-# ps -o field1.filed2 可以定义显示哪些列信息
-# ps -eo pcpu,comm
-# -o 参数 pcpu cpu占用率,pid进程id,ppid父进程id,pmem内存使用率,comm可执行文件名
-# cmd简单命令,user启动进程的用户,nice优先级,time累计cpu时间,etime进程启动后流失的时间,
-# tty所关联的tty设备,euid有效的用户ID,stat进程状态
-# ps --sort -field1,+filed2,field3...按列排序
-##pgrep command
-
-###trap为脚本设置信号处理
-
-###收集系统消息
