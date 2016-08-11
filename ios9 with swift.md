@@ -882,4 +882,44 @@ tellToFly(b)
 这样任何一种类型,enum,struct,class,protocol都可以使用Flier.
 
 
+## Xcode7
+### 文件目录结构
+project_name.xcodeproj,保存着项目信息:项目包含哪些文件,如何编译项目  
+Base.lproj包含两个文件Main.storyboard and LaunchScreen.storyboard  
+Assets.xcassets资源目录  
+在Project navigator的分组,不会影响项目编译,他只是为了方便查看
+### The Target
+target是一个集合,它包含编译项目的规则和设置.编译的时候其实就是在编译target,有时候编译多个target  
+在Project navigator点击最顶层项目名称,中间的editor会显示target的编辑页面
+#### Build Phases
+The build phases are both a report to you on how the target will be built and a set of instructions to Xcode on how to build the target
+- Compile Sources  
+  包含被编译的文件 and the resulting compiled code is copied into the app.
+- Copy Bundle Resources  
+  包含被复制到app中的资源文件,这样app运行时,系统就能找到他们
+有时候可能需要添加Run Script build phase,他是shell命令,点击作伴+按钮添加
+### From Project to Running App
+app文件结构
+```
+Base.lproj  
+    LaunchScreen.storyboardc  
+    Main.storyboardc  
+Empty Window  
+Frameworks  
+    libswiftContacts.dylib  
+    libswiftCore.dylib  
+    libswiftCoreGraphics.dylib  
+    libswiftCoreImage.dylib  
+    libswiftDarwin.dylib  
+    libswiftDispatch.dylib  
+    libswiftFoundation.dylib  
+    libswiftObjectiveC.dylib  
+    libswiftUIKit.dylib  
+Info.plist  
+PkgInfo  
+```
+### Nib Files
+定义用户界面
+### Code Files and the App Launch Process
+
 ## Cococa
