@@ -565,4 +565,278 @@ func anyCommonElements<T: Sequence, U: Sequence where T.Iterator.Element: Equata
 }
 anyCommonElements([1, 2, 3], [3])
 ```
-## swift详解
+# swift详解
+## 语法基础(The Basic)
+### 变量定义
+常量通过`let`定义,变量通过`var`定义,可以一次定义多个变量用`,`隔开。如果你确定变量的值在运行过程中不会改变的话,就用`let`定义它(例如配置信息等)。
+> 2.0 中测试出如果变量定义名称相同,会覆盖前面的定义。
+
+```swift
+let maximumNumberOfLoginAttempts = 10
+var currentLoginAttempt = 0
+var x = 0.0, y = 0.0, z = 0.0
+```
+### 类型声明
+你可以在定义变量的时候,指定变量的类型。`var welcome:String="hello"`(定义变量是如果类型不是`optional`必须初始化一个值)。你也可以在一行中同时定义几个相同类型的变量`var red, green, blue: Double?`
+### 变量名
+你几乎可以使用任何一个你喜欢的字符作为名称
+```swift
+let π = 3.14159
+let 你好 = "你好世界"
+let 🐶🐮 = "dogcow"
+```
+你可以在变量声明之后给其赋予相同类型的任意值,但是常量一旦定义就不可修改其值。**如果定义的常量是个类的实例,那么改变这个实例的属性是可以的,因为他是引用类型。**
+### 打印变量
+```swift
+let name:String="Merlin.G"
+let age:Int=20
+print("\(name) are \(age) years old")
+//Merlin.G are 20 years old
+```
+### 注释
+swift使用`//`和`/**/`来注释代码,swift也不需要`;`结尾,除非你在一行内执行多条命令`let name:String="Merlin.G";let age:Int=20`
+### 整型
+swift提供了8,16,32,64位类型整数,分别为([U]Int8,[U]Int16,[U]Int32,[U]Int64)。swift中提供了Int和UInt两个类型他们有当前平台长度一直。
+### 小数
+swift中有两种小数类型`Float`32位,`Double`64位。
+### 类型安全与推断
+swift是类型安全的,这需要你明确知道,你所操作的对象的类型。比如你的变量是String那么就不可以传Int过去。swift会在编译时就检查这些类型。但是swift也提供了类型推断功能,比如`var unknown_type=32`这里swift会自动推断出unknown_type变量的类型为Int。默认swift把整数推断为Int,小数推断为Double。  
+表达式也会自动被推断
+```swift
+let anotherPi = 3 + 0.14159
+// anotherPi 会被推测为 Double 类型
+//这里3并没有类型
+```
+### Numeric Literals
+整数有多重写法
+- 没有前缀的十进制数
+- `0b`开头,二进制
+- `0o`开头,8进制
+- `0x`开头,16进制
+
+```swift
+let decimalInteger = 17
+let binaryInteger = 0b10001       // 17 2进制
+let octalInteger = 0o21           // 17 8进制
+let hexadecimalInteger = 0x11     // 17 16进制
+```
+小数的写法  
+小数可以用十进制和十六进制,小数点两边至少一边有值。指数在十进制中用`e`,十六进制中用`p`。
+```swift
+let decimalDouble = 12.1875
+let exponentDouble = 1.21875e1
+let hexadecimalDouble = 0xC.3p0
+```
+**数值还可以包含额外的格式来增强可读性** 他们可以包含额外的`0`和`_`
+```swift
+let paddedDouble = 000123.456
+let oneMillion = 1_000_000
+let justOverOneMillion = 1_000_000.000_000_1
+```
+### 数值类型转换
+如果不是明确性趣优化内存,性能等,不要使用UInt8...这种整数类型,尽量直接使用Int类型。   
+不同类型的整数能存储的值有固定范围(`Int8.min`和`Int8.max`)。因为swift是类型安全所以一旦赋值范围不在(min~max)那么就报错。
+```swift
+let cannotBeNegative: UInt8 = -1
+// Uint8 不可以保存负数
+let tooBig: Int8 = Int8.max + 1
+// 超出Int8的最大范围了
+```
+两个不同类型的变量,需要进行类型转换后才可以使用。*(当尝试将字符串转为数字式返回的`optional`类型,而这段代码中UInt16(one)返回的却是UInt16,貌似是构造函数搞鬼(-_-)没有细究)*
+```swift
+let twoThousand: UInt16 = 2_000
+let one: UInt8 = 1
+let twoThousandAndOne = twoThousand + UInt16(one)
+```
+### 类型别名
+类型别名是个当前类型指定一个可选的名称,这个别名与原类型是同一个东西。使用`typealias`
+```swift
+typealias AudioSample = UInt16
+var maxAmplitudeFound = AudioSample.min
+```
+### 布尔类型
+swift的布尔类型为`Bool`。只有`true`和`false`连个值。
+> swift中控制流的条件是Bool类型,而且只能是Bool类型,如果是其他类型,需要转换为Bool类型,否则会报错.例如 if 2 {}就报错
+
+### 元祖
+元祖有点python元祖的味道。元祖内的元素类型不需要相同
+```swift
+let http404Error = (404, "Not Found")
+// http404Error is of type (Int, String), and equals (404, "Not Found")
+```
+将元祖拆分 *(python和es2015更简洁)*
+```swift
+let (statusCode, statusMessage) = http404Error
+print("The status code is \(statusCode)")
+// Prints "The status code is 404"
+print("The status message is \(statusMessage)")
+// Prints "The status message is Not Found
+```
+也可以用`_`忽略某个位置的值
+```swift
+let (justTheStatusCode, _) = http404Error
+print("The status code is \(justTheStatusCode)")
+```
+访问元祖的元素,默认是使用下标从0开始`print("The status code is \(http404Error.0)")`  
+我们也可以给元素指定名称,这样就可以用名称来访问元素
+```swift
+let http200Status = (statusCode: 200, description: "OK")
+print("The status code is \(http200Status.statusCode)")
+print("The status message is \(http200Status.description)")
+```
+### Optionals
+当变量的值有可能不存在是时候,你可能会使用`Optionals`.`optional`有两种情况:要么他有值,然后你可以解析出来,要么就没有值。  
+一个例子:你想把一个字符串转换为Int类型,但是这个字符串有可能无法转换为Int比如"hello"。
+```swift
+let possibleNumber = "123"
+let convertedNumber = Int(possibleNumber)
+// convertedNumber is inferred to be of type "Int?", or "optional Int”
+/*
+* 这里的转换会返回一个Int类型还是Int?,结果是:
+* possibleNumber: String = "123"
+* convertedNumber: Int? = 123
+*/
+/*********************************************/
+let possibleNumber = "hello"
+let convertedNumber = Int(possibleNumber)
+/*
+* 这里的转换会返回一个Int类型还是Int?,结果是:
+* possibleNumber: String = "hello"
+* convertedNumber: Int? = nil
+*/
+```
+因为这里的构造函数可能失败,所以他返回了一个`Int?`,`?`表示这是个`optional`类型。
+### nil
+默认optional类型的值为`nil`,表示他不包含值。
+```swift
+var surveyAnswer: String?
+//surveyAnswer: String? = nil
+var serverResponseCode: Int? = 404
+serverResponseCode = nil
+//serverResponseCode: Int? = nil
+```
+### if和强制解析
+可以通过if语句判断变量是否包含值,如果包含的话,在变量后面加上`!`可以取出值。
+```swift
+if convertedNumber != nil {
+    print("convertedNumber has an integer value of \(convertedNumber!).")
+}
+```
+### Optional Binding
+可以通过*optional binding* 来判断一个optional是否包含值,如果包含的话,就把它们赋值给,临时的常量或者变量。可以再'if'和`while`语句中使用。
+```swift
+if let constantName = someOptional {
+    statements
+}
+```
+这样的话上面的字符串转Int就可以这么写
+```swift
+if let actualNumber = Int(possibleNumber) {
+    print("\"\(possibleNumber)\" has an integer value of \(actualNumber)")
+} else {
+    print("\"\(possibleNumber)\" could not be converted to an integer")
+}
+// Prints ""123" has an integer value of 123"
+/*
+这里可以这么理解,如果Int(possibleNumber)成功把字符串转成了Int那么把这个值赋给actualNumber*(“It has already been initialized with the value contained within the optional, and so there is no need to use the ! suffix to access its value”是啥意思,为毛已经被初始化)*
+*/
+```
+如果想要在if代码块中修改临时变量,那么需要用`var`定义这个变量。   
+你可以在一条if中包含多个条件,他们用`,`分离,只要其中一个为false,整条语句就为false
+```swift
+if let firstNumber = Int("4"), let secondNumber = Int("42"), firstNumber < secondNumber && secondNumber < 100 {
+    print("\(firstNumber) < \(secondNumber) < 100")
+}
+// Prints "4 < 42 < 100"
+
+if let firstNumber = Int("4") {
+    if let secondNumber = Int("42") {
+        if firstNumber < secondNumber && secondNumber < 100 {
+            print("\(firstNumber) < \(secondNumber) < 100")
+        }
+    }
+}
+// Prints "4 < 42 < 100"
+```
+### Implicitly Unwrapped Optionals(隐式解析)
+上面可以看到,可以通过if来判断optional是否有值。但是有的时候程序一旦运行optional总是有值的。这样的话就没有必要每次去判断然后解析optional的值。我们可以使用`var a:String!="hello"`这里用的是`!`。这样定义变量后,当访问变量的时候swift会自动解析出它包含的值。
+```swift
+let possibleString: String? = "An optional string."
+let forcedString: String = possibleString! // requires an exclamation mark
+
+let assumedString: String! = "An implicitly unwrapped optional string."
+let implicitString: String = assumedString // no need for an exclamation mark
+```
+你仍然可以把这个变量当做普通的optional来处理
+```swift
+if assumedString != nil {
+    print(assumedString)
+}
+if let definiteString = assumedString {
+    print(definiteString)
+}
+// Prints "An implicitly unwrapped optional string."
+```
+### 错误处理
+当一个函数发生错误时,他会抛出异常。他的调用者,可以捕获异常并进行适当的处理,定义函数可以抛出异常需要在定义时加上`throws`,当你调用一个可能抛出异常的函数时,使用`try`。catch可以捕获不同的异常。
+```swift
+func canThrowAnError() throws {
+    // this function may or may not throw an error
+}
+do {
+    try canThrowAnError()
+    // no error was thrown
+} catch {
+    // an error was thrown
+}
+func makeASandwich() throws {
+    // ...
+}
+
+do {
+    try makeASandwich()
+    eatASandwich()
+} catch SandwichError.outOfCleanDishes {
+    washDishes()
+} catch SandwichError.missingIngredients(let ingredients) {
+    buyGroceries(ingredients)
+}
+```
+### Assertions(断言)
+有时候,在缺少某些必要条件的时候你的代码没办法继续运行。这时候你可以使用断言机制。可以用断言调试代码。当断言条件不满足时抛出异常等。
+```swift
+let age = -3
+assert(age >= 0, "A person's age cannot be less than zero")
+// this causes the assertion to trigger, because age is not >= 0”
+```
+断言也可以不发送消息`assert(age >= 0)` **断言慎用！**。
+
+
+
+
+
+
+## 基本运算符(Basic Operators)
+## 字符串和字符(Strings and Characters)
+## 集合类型(Collection Types)
+## 控制流(Control Flow)
+## 函数(Functions)
+## 闭包(Closures)
+## 枚举(Enumerations)
+## 类和结构体(Classes and Structures)
+## 属性(Properties)
+## 方法(Methods)
+## 下标(Subscripts)
+## 继承(Inheritance)
+## 构造函数(Initialization)
+## 析构函数(Deinitialization)
+## 自动引用计数(Automatic Reference Counting)
+## 可选链(Optional Chaining)
+## 错误处理(Error Handling)
+## 类型转换(Type Casting)
+## 嵌套类型(Nested Types)
+## 扩展(Extensions)
+## 协议(Protocols)
+## 泛型(Generics)
+## 访问控制(Access Control)
+## 高级运算符(Advanced Operators)
