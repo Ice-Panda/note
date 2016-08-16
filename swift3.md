@@ -810,13 +810,55 @@ assert(age >= 0, "A person's age cannot be less than zero")
 // this causes the assertion to trigger, because age is not >= 0”
 ```
 断言也可以不发送消息`assert(age >= 0)` **断言慎用！**。
-
-
-
-
-
-
 ## 基本运算符(Basic Operators)
+算术运算符`= + - * / % ++ -- -= += *= /= %=`  
+比较操作符`> < == != <= >=`  
+元祖也可以进行比较,只要他们包含相同数量的值,并且值可以进行比较。    
+他会从做到右依次比较,每次只比较一个元素,直到他们不相同,否元祖就是相等的。  
+```swift
+(1, "zebra") < (2, "apple")   // true because 1 is less than 2
+(3, "apple") < (3, "bird")    // true because 3 is equal to 3, and "apple" is less than "bird"
+(4, "dog") == (4, "dog")      // true because 4 is equal to 4, and "dog" is equal to "dog"
+```
+三元运算符` question ? answer1 : answer2`
+### Nil-Coalescing Operator
+`a ?? b`表示:如果a这个optional类型有值的话,就取出来,否则用b作为默认值。他类似这样`a != nil ? a! : b`。这个方式可以做很多有趣的事情,比如尝试获取系统配置,如果没有获取到,就给定义一个默认值。
+```swift
+let defaultColorName = "red"
+var userDefinedColorName: String?   // defaults to nil
+var colorNameToUse = userDefinedColorName ?? defaultColorName
+// userDefinedColorName is nil, so colorNameToUse is set to the default of "red"
+
+userDefinedColorName = "green"
+colorNameToUse = userDefinedColorName ?? defaultColorName
+// userDefinedColorName is not nil, so colorNameToUse is set to "green”
+```
+### Range Operators(区间运算符)
+`a...b`包含两边的值 ,`a..<b`不包含右边的值
+```swift
+for index in 1...5 {
+    print("\(index) times 5 is \(index * 5)")
+}
+// 1 times 5 is 5
+// 2 times 5 is 10
+// 3 times 5 is 15
+// 4 times 5 is 20
+// 5 times 5 is 25
+
+let names = ["Anna", "Alex", "Brian", "Jack"]
+let count = names.count
+for i in 0..<count {
+    print("Person \(i + 1) is called \(names[i])")
+}
+// Person 1 is called Anna
+// Person 2 is called Alex
+// Person 3 is called Brian
+// Person 4 is called Jack
+```
+### 逻辑运算符
+`&&`,`||`,'！',和大多数语言一样是短路运算
+
+
 ## 字符串和字符(Strings and Characters)
 ## 集合类型(Collection Types)
 ## 控制流(Control Flow)
