@@ -857,10 +857,88 @@ for i in 0..<count {
 ```
 ### 逻辑运算符
 `&&`,`||`,'！',和大多数语言一样是短路运算
-
-
 ## 字符串和字符(Strings and Characters)
+String有一系列Character组成,string的内容可以通过多种方式访问。swift中字符串用`""`表示。
+### 创建String
+可以直接给变量赋值`""`这样就是一个空字符串,也可以`String()`。isEmpty属性表示字符串是否为空,他是Bool类型。
+```swift
+let s=""
+var s=String()
+print(s.isEmpty)
+```
+字符串可以直接用`+`链接,可以通过遍历String的characters属性来处理每一个字符。
+```swift
+for character in "Dog!🐶".characters {
+    print(character)
+}
+// D
+// o
+// g
+// !
+// 🐶
+```
+字符串也可以通过Character数组来实例化,*String还提供很多方法具体看api*
+```swift
+let catCharacters: [Character] = ["C", "a", "t", "!", "🐱"]
+let catString = String(catCharacters)
+print(catString)
+// Prints "Cat!🐱”
+```
+### 访问和修改字符串
+我们可以通过函数以及属性来访问修改字符串,也可以使用下标    
+#### 字符串索引
+swift中每个字符串都有索引类型,他标记每个字符在字符串中的位置。因为不同的字符集使用的存储空间是不一样的,所以不可以使用整数下标。  
+`startIndex`属性是字符串的第一位置索引,`endIndex`属性是字符串**最后一个字符的下一个位置**,所以`endIndex`不可以作为有效的索引。如果一个字符串为空那么endIndex=startIndex  
+可以通过字符串的`index(before:)`,`index(after:)`方法来访问字符。为了能够多次使用一个索引你可以使用`index(_:offsetBy:)`来设置一个索引
+```swift
+let greeting = "Guten Tag!"
+greeting[greeting.startIndex]
+// G
+greeting[greeting.index(before: greeting.endIndex)]
+// !
+greeting[greeting.index(after: greeting.startIndex)]
+// u
+let index = greeting.index(greeting.startIndex, offsetBy: 7)
+greeting[index]
+// a
+```
+如果索引位置超出了字符串,那么会报错
+```swift
+greeting[greeting.endIndex] // error 上面提到了endIndex不可作为有效的索引
+greeting.index(after: endIndex) // error
+```
+使用characters.indices可以取出字符串中所有的索引
+```swift
+for index in greeting.characters.indices {
+    print("\(greeting[index]) ", terminator: "")
+}
+// Prints "G u t e n   T a g !"
+```
+#### 插入和删除
+将一个字符插入字符串中使用`insert(_:at:)`,将一个字符串插入另一个字符串中使用`insert(contentsOf:at:)`。**2.0版本没有这个方法,有insertContentsOf方法**
+```swift
+var welcome = "hello"
+welcome.insert("!", at: welcome.endIndex)
+// welcome now equals "hello!"
+
+welcome.insert(contentsOf:" there".characters, at: welcome.index(before: welcome.endIndex))
+// welcome now equals "hello there!"
+```
+删除一个字符可以使用`remove(at:)`,删除一段字符串使用`removeSubrange(_:)` **2.0使用removeRange**
+```swift
+welcome.remove(at: welcome.index(before: welcome.endIndex))
+// welcome now equals "hello there"
+
+let range = welcome.index(welcome.endIndex, offsetBy: -6)..<welcome.endIndex
+welcome.removeSubrange(range)
+// welcome now equals "hello"
+```
+#### 判断字符串开头结尾包含的字符串
+`hasPrefix(_:)`开头,`hasSuffix(_:)`结尾,他们返回Bool。
+> 关于unicode 再说吧
+
 ## 集合类型(Collection Types)
+
 ## 控制流(Control Flow)
 ## 函数(Functions)
 ## 闭包(Closures)
