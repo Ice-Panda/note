@@ -938,7 +938,168 @@ welcome.removeSubrange(range)
 > 关于unicode 再说吧
 
 ## 集合类型(Collection Types)
+swift提供了三种原生Collection类型:数组,集合,字典。数组是有序的,集合和字典无序。  
+数组,集合,字典都是可变的。但是如果用`let`声明的话,将不可变,也就是他们的大小,内容都不能改变。  
+### 数组
+数组有多种创建方法
+```swift
+var someInts = [Int]()//创建一个空数组
+someInts.append(3)//往数组添加值
+someInts = []//清空数组
 
+//用默认值初始化数组
+var threeDoubles = Array(repeating: 0.0, count: 3)//数组长度为3,每个元素都是0.0
+//通过两个数组相加得到另一个数组
+var anotherThreeDoubles = Array(repeating: 2.5, count: 3)
+var sixDoubles = threeDoubles + anotherThreeDoubles
+//直接初始化值
+var shoppingList = ["Eggs", "Milk"]//类型推断
+var shoppingList: [String] = ["Eggs", "Milk"]
+```
+#### 访问数组
+`count`返回数组长度。`isEmpty`是否为空。`append`添加值。  
+- 修改数组元素`“shoppingList[0] = "Six eggs"`
+- 替换掉一段元素`shoppingList[4...6] = ["Bananas", "Apples"]`
+- 插入到指定位置`shoppingList.insert("Maple Syrup", at: 0)`
+- 删除指定位置元素 `let mapleSyrup = shoppingList.remove(at: 0)`
+- 删除最后一个元素 `let apples = shoppingList.removeLast()`
+
+#### 循环一个数组
+`for-in`可以遍历数组的每一个元素,如果想要同时遍历下标以及值,可以使用`enumerated()`方法
+```swift
+for item in shoppingList {
+    print(item)
+}
+// Six eggs
+// Milk
+// Flour
+// Baking Powder
+// Bananas
+
+for (index, value) in shoppingList.enumerated() {
+    print("Item \(index + 1): \(value)")
+}
+```
+### 集合
+集合中的元素是无序的,并且元素唯一。集合中元素的类型必须可以计算自身的hash值。Int,String,Double,Bool,Enumerations都是可hash的,所以他们可以作为集合的元素,也可以作为字典的key。集合比较两个元素是否相等使用`a.hashValue == b.hashValue`  
+> 也可以自己定义一个类型,来作为集合元素或者字典的key,但是这个类型必须实现 Hashable协议,他需要提供一个Int类型的属性包含hashValue
+
+#### 集合相关操作
+```swift
+var letters = Set<Character>()//创建空集合
+letters.insert("a")//往集合插入数值
+letters = []//清空集合
+var favoriteGenres: Set = ["Rock", "Classical", "Hip hop"]//集合不可以直接从列表推导过来,所以这里一定要加上Set
+var favoriteGenres: Set<String> = ["Rock", "Classical", "Hip hop"]//指定类型初始化
+favoriteGenres.contains("Funk")//判断集合是否包含"Funk"
+favoriteGenres.remove("Rock")//删除指定元素,失败nil
+favoriteGenres.removeAll()//删除所有元素
+```
+使用`for-in`遍历集合,集合也可以使用`sorted()`来排序
+```swift
+
+for genre in favoriteGenres.sorted() {
+    print("\(genre)")
+}
+```
+逻辑处理
+- `intersection(_:)`//创建新的集合,A,B集合共有的部分
+- `symmetricDifference(_:)`//创建新的集合,两个集合union之后去除共有的部分
+- `union(_:)`//创建新的集合,A,B集合所有的元素放一起
+- `subtracting(_:)`  //创建新的集合,包含在A,不包含在B的元素
+
+包含关系
+- `isSubset(of:)`B集合的元素是否都包含在A集合中
+- `isSuperset(of:)`A集合是否包含B集合的所有元素
+- `isStrictSubset(of:)`A,B两个集合元素都相同,但是A,B是不等的
+- `isStrictSuperset(of:)`A,B两个集合元素都相同,但是A,B是不等的
+- `isDisjoint(with:)`判断A,B是否有共同的元素
+```swift
+let oddDigits: Set = [1, 3, 5, 7, 9]
+let evenDigits: Set = [0, 2, 4, 6, 8]
+let singleDigitPrimeNumbers: Set = [2, 3, 5, 7]
+
+oddDigits.union(evenDigits).sorted()
+// [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+oddDigits.intersection(evenDigits).sorted()
+// []
+oddDigits.subtracting(singleDigitPrimeNumbers).sorted()
+// [1, 9]
+oddDigits.symmetricDifference(singleDigitPrimeNumbers).sorted()
+// [1, 2, 9]
+
+let houseAnimals: Set = ["🐶", "🐱"]
+let farmAnimals: Set = ["🐮", "🐔", "🐑", "🐶", "🐱"]
+let cityAnimals: Set = ["🐦", "🐭"]
+
+houseAnimals.isSubset(of: farmAnimals)
+// true
+farmAnimals.isSuperset(of: houseAnimals)
+// true
+farmAnimals.isDisjoint(with: cityAnimals)
+// true”
+```
+### 字典
+字典也是无序的,他一key->value形式,与生活的字典差不多。
+#### 字典基本操作
+```swift
+var namesOfIntegers = [Int: String]()//创建空字典
+namesOfIntegers[16] = "sixteen"//如果字典存在key:16那么更行key:16的值,不存在就添加key:16
+namesOfIntegers = [:]//清空字典
+var airports = ["YYZ": "Toronto Pearson", "DUB": "Dublin"]//创建字典的另一种方式,自动推导类型
+var airports: [String: String] = ["YYZ": "Toronto Pearson", "DUB": "Dublin"]//创建字典的另一种方式,声明类型
+```
+#### 字典访问
+字典可以直接用key开或者对应元素的值,字典提供了`updateValue(_:forKey:)`方法,这个方法在调用时:如果可以不存在,则创建,存在则更新。但是这个方法会返回key对应的旧值(如果旧值存在的话),类型为optional,这样我们就可以判断是否是更新操作。当我们去读取字典的元素时,他返回的其实是一个optional类型,如果key对应值存在,返回该值,不存在返回nil。将key对应值赋值为nil,可以删除该元素。
+```swift
+airports["LHR"] = "London"
+airports["LHR"] = "London Heathrow"//这里可以任意修改key对应值
+
+//更新或添加key
+if let oldValue = airports.updateValue("Dublin Airport", forKey: "DUB") {
+    print("The old value for DUB was \(oldValue).")
+}
+
+//读取字典元素
+if let airportName = airports["DUB"] {
+    print("The name of the airport is \(airportName).")
+} else {
+    print("That airport is not in the airports dictionary.")
+}
+// Prints "The name of the airport is Dublin Airport.”
+
+//将key对应值赋值为nil,可以删除key
+airports["APL"] = "Apple International
+airports["APL"] = nil
+
+//使用removeValue(forKey:)来删除key,如果key存在返回key对应值(optional),不存在返回nil
+if let removedValue = airports.removeValue(forKey: "DUB") {
+    print("The removed airport's name is \(removedValue).")
+} else {
+    print("The airports dictionary does not contain a value for DUB.")
+}
+```
+#### 遍历字典
+`for-in`遍历字典,通过`keys`和`values`属性可以遍历字典的键和值。字典是无序的但是我们可以调用keys.sorted()或者values.sorted()。 **2.0是sort()**
+```swift
+for (airportCode, airportName) in airports {
+    print("\(airportCode): \(airportName)")
+}
+for airportCode in airports.keys {
+    print("Airport code: \(airportCode)")
+}
+for airportName in airports.values {
+    print("Airport name: \(airportName)")
+}
+```
+有时候你可能想把字典的keys或者values转化为数组
+```swift
+let airportCodes = [String](airports.keys)
+// airportCodes is ["YYZ", "LHR"]
+
+let airportNames = [String](airports.values)
+// airportNames is ["Toronto Pearson", "London Heathrow"]
+```
 ## 控制流(Control Flow)
 ## 函数(Functions)
 ## 闭包(Closures)
