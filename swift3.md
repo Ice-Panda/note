@@ -915,7 +915,7 @@ for index in greeting.characters.indices {
 // Prints "G u t e n   T a g !"
 ```
 #### 插入和删除
-将一个字符插入字符串中使用`insert(_:at:)`,将一个字符串插入另一个字符串中使用`insert(contentsOf:at:)`。**2.0版本没有这个方法,有insertContentsOf方法**
+将一个字符插入字符串中使用`insert(_:at:)`,将一个字符串插入另一个字符串中使用`insert(contentsOf:at:)`。**2.0版本有insertContentsOf方法**
 ```swift
 var welcome = "hello"
 welcome.insert("!", at: welcome.endIndex)
@@ -924,7 +924,7 @@ welcome.insert("!", at: welcome.endIndex)
 welcome.insert(contentsOf:" there".characters, at: welcome.index(before: welcome.endIndex))
 // welcome now equals "hello there!"
 ```
-删除一个字符可以使用`remove(at:)`,删除一段字符串使用`removeSubrange(_:)` **2.0使用removeRange**
+删除一个字符可以使用`remove(at:)`,删除一段字符串使用`removeSubrange(_:)` **2.0有removeRange**
 ```swift
 welcome.remove(at: welcome.index(before: welcome.endIndex))
 // welcome now equals "hello there"
@@ -1080,7 +1080,7 @@ if let removedValue = airports.removeValue(forKey: "DUB") {
 }
 ```
 #### 遍历字典
-`for-in`遍历字典,通过`keys`和`values`属性可以遍历字典的键和值。字典是无序的但是我们可以调用keys.sorted()或者values.sorted()。 **2.0是sort()**
+`for-in`遍历字典,通过`keys`和`values`属性可以遍历字典的键和值。字典是无序的但是我们可以调用keys.sorted()或者values.sorted()。
 ```swift
 for (airportCode, airportName) in airports {
     print("\(airportCode): \(airportName)")
@@ -1101,6 +1101,199 @@ let airportNames = [String](airports.values)
 // airportNames is ["Toronto Pearson", "London Heathrow"]
 ```
 ## 控制流(Control Flow)
+swift提供了多种流程控制语法。包括循环`while`,分支`if`,`guard`,`switch`。以及`break`,`continue`  
+swift也提供了`for-in`来更加方便的遍历数组,字典,ranges,字符串,以及其他序列对象  
+### For-In循环
+循环可以用来遍历序列,例如数字区间,数组,字符串
+```swift
+//刚进入循环是index为rang(1),一次结束后一次变成range(2)..。
+//index在每次循环操作时自动创建,并且为常量。所以我们不需要声明index。
+for index in 1...5{
+    print("\(index) times 5 is \(index * 5)")
+}
+//如果你不想知道index的值,可以用"_"代替它
+let base = 3
+let power = 10
+var answer = 1
+for _ in 1...power {
+    answer *= base
+}
+```
+### While循环
+while虚幻有两种情况:   
+1.先判断条件是否符合   
+```swift
+while condition{
+    statement
+}
+```
+2.代码运行结束后再检测条件是否符合   
+```swift
+repeat{
+    statement
+}while condition
+```
+### if条件
+```swift
+temperatureInFahrenheit = 90
+if temperatureInFahrenheit <= 32 {
+    print("It's very cold. Consider wearing a scarf.")
+} else if temperatureInFahrenheit >= 86 {
+    print("It's really warm. Don't forget to wear sunscreen.")
+} else {
+    print("It's not that cold. Wear a t-shirt.")
+}
+// Prints "It's really warm. Don't forget to wear sunscreen."
+```
+### swift
+如果条件判断较多的话用`switch`替代`if`是个不错的选择。swift会包给定的值,与多个模式进行匹配。通常是对一个值和多个与他类型相同的值进行比较。swift提供了更多的功能来实现较为复杂的模式匹配。`default`会在没有任何匹配时执行。每当匹配到一条规则后swift就会`break`出来。每一个case分支必须至少包含一条可执行语句。
+```swift
+switch some value to consider {
+case value 1:
+    respond to value 1
+case value 2,
+     value 3:
+    respond to value 2 or 3
+default:
+    otherwise, do something else
+}
+```
+case可以一次匹配多个模式,需要用`,`将他们隔开。
+```swift
+let anotherCharacter: Character = "a"
+switch anotherCharacter {
+case "a", "A":
+    print("The letter A")
+default:
+    print("Not the letter A")
+}
+```
+#### Interval Matching
+模式可以是一个区间,判断给定值是否在该模式区间内。下面这个例子用数字区间
+```swift
+let approximateCount = 62
+let countedThings = "moons orbiting Saturn"
+var naturalCount: String
+switch approximateCount {
+case 0:
+    naturalCount = "no"
+case 1..<5:
+    naturalCount = "a few"
+case 5..<12:
+    naturalCount = "several"
+case 12..<100:
+    naturalCount = "dozens of"
+case 100..<1000:
+    naturalCount = "hundreds of"
+default:
+    naturalCount = "many"
+}
+print("There are \(naturalCount) \(countedThings).")
+// Prints "There are dozens of moons orbiting Saturn."
+```
+#### Tuple Matching
+switch还可以使用元祖来做模式匹配。元祖中的元素既可以是值,也可以是区间,使用`_`来匹配所有情况。下面这个例子使用(Int,Int)元祖。
+```swift
+let somePoint = (1, 1)
+switch somePoint {
+case (0, 0):
+    print("(0, 0) is at the origin")
+case (_, 0):
+    print("(\(somePoint.0), 0) is on the x-axis")
+case (0, _):
+    print("(0, \(somePoint.1)) is on the y-axis")
+case (-2...2, -2...2):
+    print("(\(somePoint.0), \(somePoint.1)) is inside the box")
+default:
+    print("(\(somePoint.0), \(somePoint.1)) is outside of the box")
+}
+// Prints "(1, 1) is inside the box"
+```
+#### Value 绑定
+swift case可以绑定值或者他匹配的值到临时常量或者变量上,因为绑定到了常量或者变量上,这样这个case内的语句就可以访问到这个他。
+```swift
+let anotherPoint = (2, 0)
+switch anotherPoint {
+case (let x, 0):
+    print("on the x-axis with an x value of \(x)")
+case (0, let y):
+    print("on the y-axis with a y value of \(y)")
+case let (x, y):
+    print("somewhere else at (\(x), \(y))")
+}
+// Prints "on the x-axis with an x value of 2"
+
+//多个模式在一个case中时也支持值绑定
+let stillAnotherPoint = (9, 0)
+switch stillAnotherPoint {
+case (let distance, 0), (0, let distance):
+    print("On an axis, \(distance) from the origin")
+default:
+    print("Not on an axis")
+}
+```
+#### Where
+swift case可以使用`where`来做额外的条件验证。*(有点意思)*
+```swift
+let yetAnotherPoint = (1, -1)
+switch yetAnotherPoint {
+case let (x, y) where x == y:
+    print("(\(x), \(y)) is on the line x == y")
+case let (x, y) where x == -y:
+    print("(\(x), \(y)) is on the line x == -y")
+case let (x, y):
+    print("(\(x), \(y)) is just some arbitrary point")
+}
+// Prints "(1, -1) is on the line x == -y"
+```
+### Control Transfer Statements(控制跳转)
+swift中有5个控制跳转语句`continue`,`break`,`fallthrough`,`return`,`throw`
+**continue** 停止当前循环,执行下一次循环  
+**break** 立即结束整个控制流,可以用在`switch`或者循环中。   
+**fullthrough** 可以让switch匹配到一个case之后继续想下匹配  
+### Labeled Statements(标签)*(不愿用)*
+。。。。
+### Early Exit(提前退出)
+`guard`语句和`if`类似,依赖于条件来决定是否执行代码。`guard`要求条件必须为真才会执行代码块,和`if`不同之处是`guard`必须有一个`else`语句,当条件不为true时执行else代码块。**guard** 可读性比较高
+```swift
+func greet(person: [String: String]) {
+    guard let name = person["name"] else {
+        return
+    }
+    print("Hello \(name)!")
+
+    guard let location = person["location"] else {
+        print("I hope the weather is nice near you.")
+        return
+    }
+    print("I hope the weather is nice in \(location).")
+}
+greet(person: ["name": "John"])
+// Prints "Hello John!"
+// Prints "I hope the weather is nice near you."
+greet(person: ["name": "Jane", "location": "Cupertino"])
+// Prints "Hello Jane!"
+// Prints "I hope the weather is nice in Cupertino."
+```
+### Checking API Availability(检查Api是否可用)
+如果在swift中调用了不存在的api,会在编译时报错。  
+使用`if`或者`guard`来判断api在运行时是否可用。编译器会使用可用的api来执行代码
+```swift
+if #available(iOS 10, macOS 10.12, *) {
+    // Use iOS 10 APIs on iOS, and use macOS 10.12 APIs on macOS
+} else {
+    // Fall back to earlier iOS and macOS APIs
+}
+```
+上面代码的意思是版本号大于IOS10,或者macOS10.12的平台上使用`if`代码块。`*`是必须的,表示其他任何平台。`if`语句表示代码执行的最低版本。   
+通常可用的条件列表包含名称和版本号,名称可以是"iOS, macOS, watchOS, and tvOS" 例如 IOS 10 ,macOS 10.12。
+```swift
+if #available(platform name version, ..., *) {
+    statements to execute if the APIs are available
+} else {
+    fallback statements to execute if the APIs are unavailable
+}
+```
 ## 函数(Functions)
 ## 闭包(Closures)
 ## 枚举(Enumerations)
