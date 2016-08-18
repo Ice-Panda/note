@@ -1291,10 +1291,185 @@ if #available(iOS 10, macOS 10.12, *) {
 if #available(platform name version, ..., *) {
     statements to execute if the APIs are available
 } else {
-    fallback statements to execute if the APIs are unavailable
+    fallback statements to execute if the APIs are unavailable|
 }
 ```
 ## 函数(Functions)
+函数也是一种类型,这意味着函数可以被当做参数,或者返回值。
+### 参数与返回值
+函数可以有多个参数,也可以没有参数,可以有返回值,也可以没有。
+```swift
+func sayHello(){
+    print("sayHello")
+}
+func sayHello(name:String)->String{
+    print("hello \(name)")
+    return "say hello"
+}
+```
+函数可以返回一个元祖来包含多个返回值。
+```swift
+func minMax(array: [Int]) -> (min: Int, max: Int) {
+    var currentMin = array[0]
+    var currentMax = array[0]
+    for value in array[1..<array.count] {
+        if value < currentMin {
+            currentMin = value
+        } else if value > currentMax {
+            currentMax = value
+        }
+    }
+    return (currentMin, currentMax)
+    //返回一个元祖,上面定义了元祖元素的名字,所以当我们获得函数返回值的时候,可以用名称获取对应的值
+}
+var list=[1,2,3,4,1,12,4,234,23,67]
+var result=minMax(array:list)//2.0会有报错,因为2.0没有默认将array参数标签(label)设为array
+print(result.min)
+print(result.max)
+```
+函数也可以返回optional类型
+```swift
+func minMax(array: [Int]) -> (min: Int, max: Int)? {
+    return nil
+}
+var list=[1,2,3,4,1,12,4,234,23,67]
+if let result=minMax(array:list){
+    print(result.min)
+    print(result.max)
+}
+guard let test=minMax(array:list) else{
+    print("nothing")
+}
+print(result.min)
+print(result.max)
+```
+函数参数默认都有标签,且标签名为参数名,通常我们会自定义标签。增加代码的可读性。如果给参数添加了自定义标签,传递参数时必须使用自定义标签。如果不希望参数有标签的话,可以使用`_`代替标签,这样传参数时就不需要标签名。   
+函数体内部使用的时参数名而不是标签名。标签相当于对外,参数名对内。(挺有意思)
+```swift
+func greet(person: String, from hometown: String) -> String {
+    return "Hello \(person)!  Glad you could visit from \(hometown)."
+}
+print(greet(person: "Bill", from: "Cupertino"))
+func someFunction(_ firstParameterName: Int, secondParameterName: Int) {
+    // In the function body, firstParameterName and secondParameterName
+    // refer to the argument values for the first and second parameters.
+}
+someFunction(1, secondParameterName: 2)
+```
+函数也支持默认值,但是我们都会讲带默认值的参数列表放在最后。
+#### 可变参数
+函数的一个参数可以接收一个或者多个相同类型的值(类似于数组列表)。调用函数式可以向这个参数传递不同数量的同类型数值。在函数体内部这个参数类型被变成数组。
+```swift
+func arithmeticMean(_ numbers: Double...) -> Double {
+    var total: Double = 0
+    for number in numbers {
+        total += number
+    }
+    return total / Double(numbers.count)
+}
+arithmeticMean(1, 2, 3, 4, 5)
+// returns 3.0, which is the arithmetic mean of these five numbers
+arithmeticMean(3, 8.25, 18.75)
+// returns 10.0, which is the arithmetic mean of these three numbers”
+```
+函数的参数默认值常量,如果在函数体内部改签参数的值,会报错。如果你希望在函数运行结束后参数的修改是持续的,那么需要把参数定义为`in-out`。   
+只需在参数前面加上`inout`关键字。in-out参数有一个值被传到函数中,这个值在函数中修改,然后这个值会传回给原始变量并修改其值。只能把变量当做in-out参数,常量和字面值因为不可修改所以不能传递。对于`in-out`参数,传参时在变量前添加`&`。
+```swift
+func swapTwoInts(_ a: inout Int, _ b: inout Int) {
+    let temporaryA = a
+    a = b
+    b = temporaryA
+}
+var someInt = 3
+var anotherInt = 107
+swapTwoInts(&someInt, &anotherInt)
+print("someInt is now \(someInt), and anotherInt is now \(anotherInt)")
+// Prints "someInt is now 107, and anotherInt is now 3"
+```
+### 函数类型
+每一个函数都有一个特殊的"function type",有参数类型和返回类型组成。
+```swift
+func addTwoInts(_ a: Int, _ b: Int) -> Int {
+    return a + b
+}
+func multiplyTwoInts(_ a: Int, _ b: Int) -> Int {
+    return a * b
+}
+func printHelloWorld() {
+    print("hello, world")
+}
+```
+上面前两个函数类型为(Int,Int)->Int,后一个为()->Void
+#### 使用函数类型
+函数类型跟其他类型一样用法
+```swift
+func addTwoInts(_ a: Int, _ b: Int) -> Int {
+    return a + b
+}
+var mathFunction: (Int, Int) -> Int = addTwoInts
+print("Result: \(mathFunction(2, 3))")
+```
+这里相当于变量mathFunction类型为(Int,Int)->Int,因为addTwoInts和他类型一致,所以可以赋值给他。然后就可以正常调用了。
+#### 函数类型被当做参数传递
+```swift
+func printMathResult(_ mathFunction: (Int, Int) -> Int, _ a: Int, _ b: Int) {
+    print("Result: \(mathFunction(a, b))")
+}
+printMathResult(addTwoInts, 3, 5)
+```
+#### 函数类型被当做返回类型
+```swift
+func stepForward(_ input: Int) -> Int {
+    return input + 1
+}
+func stepBackward(_ input: Int) -> Int {
+    return input - 1
+}
+func chooseStepFunction(backward: Bool) -> (Int) -> Int {
+    return backward ? stepBackward : stepForward
+}
+var currentValue = 3
+let moveNearerToZero = chooseStepFunction(backward: currentValue > 0)
+// moveNearerToZero now refers to the stepBackward() function
+
+//moveNearerToZero=stepBackward类型为(Int)->Int
+
+print("Counting to zero:")
+// Counting to zero:
+while currentValue != 0 {
+    print("\(currentValue)... ")
+    currentValue = moveNearerToZero(currentValue)
+}
+print("zero!")
+// 3...
+// 2...
+// 1...
+// zero!
+```
+#### 内嵌函数
+上面所介绍的都是全局函数,他们存在于全局域中。函数也可定义在一个函数体内部,也就是内嵌函数。内嵌函数对外是不可见的,只对当前的函数内可见,当然要想对外可见,我们可以通过当前把它返回出来。
+```swift
+func chooseStepFunction(backward: Bool) -> (Int) -> Int {
+    func stepForward(input: Int) -> Int { return input + 1 }
+    func stepBackward(input: Int) -> Int { return input - 1 }
+    return backward ? stepBackward : stepForward
+}
+var currentValue = -4
+let moveNearerToZero = chooseStepFunction(backward: currentValue > 0)
+// moveNearerToZero now refers to the nested stepForward() function”
+
+while currentValue != 0 {
+    print("\(currentValue)... ")
+    currentValue = moveNearerToZero(currentValue)
+}
+print("zero!")
+// -4...
+// -3...
+// -2...
+// -1...
+// zero!”
+```
+
 ## 闭包(Closures)
 ## 枚举(Enumerations)
 ## 类和结构体(Classes and Structures)
