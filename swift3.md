@@ -1471,7 +1471,41 @@ print("zero!")
 ```
 
 ## 闭包(Closures)
+.....
+
 ## 枚举(Enumerations)
+枚举是定义一个新的类型。case可以分开定义,也可以放在一行。当变量类型为enum时,可以省略enum名称直接用`.case`给其赋值
+```swift
+enum CompassPoint {
+    case north
+    case south
+    case east
+    case west
+}
+enum Planet {
+    case mercury, venus, earth, mars, jupiter, saturn, uranus, neptune
+}
+var directionToHead = CompassPoint.west
+directionToHead = .east
+```
+### switch 匹配enum
+因为directionToHead是enum类型所以匹配时直接用`.case`,如果用'enum'需要穷举enum所有的项,否则会报错。
+```swift
+directionToHead = .south
+switch directionToHead {
+case .north:
+    print("Lots of planets have a north")
+case .south:
+    print("Watch out for penguins")
+case .east:
+    print("Where the sun rises")
+case .west:
+    print("Where the skies are blue")
+}
+// Prints "Watch out for penguins"
+```
+
+
 ## 类和结构体(Classes and Structures)
 ## 属性(Properties)
 ## 方法(Methods)
