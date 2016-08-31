@@ -1504,10 +1504,255 @@ case .west:
 }
 // Prints "Watch out for penguins"
 ```
+### 原始值
+枚举成员可以有默认值,默认值的类型一致.定义时要在添加类型名称,如果没有给成员赋值的话,swift会根据类型给定自动给定原始值.
+```swift
+enum ASCIIControlCharacter: Character {
+    case Tab = "\t"
+    case LineFeed = "\n"
+    case CarriageReturn = "\r"
+}
 
+enum Planet: Int {
+    case Mercury = 1, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
+}
+//这里会自动给Mercury后面的成员原始值加1.
 
+enum CompassPoint: String {
+    case North, South, East, West
+}
+//String类型成员默认原始值为成员名
+
+//通过rawValue可以获取原始值
+let p=Planet.Venus.rawValue
+```
+### 从原始值初始化
+如果设置了原始值类型,那么枚举对象会得到一个初始化方法,他接受原始值类型的值,从而获取到枚举成员,或者nil.这个方法会去匹配所有的成员,如果匹配到了则返回,没有则返回nil,所有她的返回类型是个`optional`.
+```swift
+let possiblePlanet = Planet(rawValue: 7)
+// possiblePlanet is of type Planet? and equals Planet.uranus
+
+enum Planet:Int{
+    case venus,earth,uranus
+}
+let p1=Planet(rawValue:1)
+print(p1!)
+//"earth\n"
+let p2=Planet(rawValue:4)
+//nil
+```
 ## 类和结构体(Classes and Structures)
+### 类和结构体对比
+- 定义属性用于存储值
+- 定义函数用于提供功能
+- 定义下标用于访问值
+- 定义构造方法用于初始化
+- 通过扩展来添加新的功能
+- 实现协议来提供通用功能
+
+类有一些结构体没有的特性
+- 继承
+- 类型转化允许在运行时检查和解释类的实例
+- 结构函数允许在实例销毁前做一些操作
+- 类的实例的引用计数可以有很多
+
+### 定义
+```swift
+struct Resolution {
+    var width = 0
+    var height = 0
+}
+class VideoMode {
+    var resolution = Resolution()
+    var interlaced = false
+    var frameRate = 0.0
+    var name: String?
+}
+```
+### 类和结构体实例
+```swift
+let someResolution = Resolution()
+let someVideoMode = VideoMode()
+```
+### 访问属性
+```swift
+print("The width of someResolution is \(someResolution.width)")
+print("The width of someVideoMode is \(someVideoMode.resolution.width)")
+someVideoMode.resolution.width = 1280
+```
+### 结构体成员构造hanshu
+所有的结构体都会自动有一个构造函数,参数为所有的属性.类没有默认的成员构造函数.
+```swift
+let vga = Resolution(width:640, height: 480)
+```
+### 值和引用类型
+结构体和枚举都是值类型,这意味着,赋值操作是一个复制的过程,创建新的实例.而类是引用类型,赋值操作时没有创建新的实例,而是让变量引用同一个地址.String,Array,Dictionary都是值类型他们是通过结构体实现的.
+判断两个变量是否引用同一个类实例使用`===`判断.`==`只是判断是否有值相等.
+
 ## 属性(Properties)
+属性将值和特定的类,结构体,枚举链接起来.存储属性用于存储值,而计算属性用于计算出一个值.计算属性可以在类,结构体,枚举中使用,而存储属性只能用于类和结构体.  
+还可以定义属性观察期,来监听属性的变化.
+### 存储属性
+存储属性实际就是常量或者变量,它作为类或者结构体实例的一部分.  
+对于结构体,如果有存储属性被定义为常量属性,定义了之后就不能改变该属性的值.对于常量结构体实例,任何属性值都不可被修改,因为他是值类型
+```swift
+struct FixedLengthRange {
+    var firstValue: Int
+    let length: Int
+}
+var rangeOfThreeItems = FixedLengthRange(firstValue: 0, length: 3)
+
+rangeOfThreeItems.firstValue=10
+rangeOfThreeItems.length=10//报错
+
+let rangeOfFourItems = FixedLengthRange(firstValue: 0, length: 4)
+rangeOfThreeItems.firstValue=10//报错
+```
+### 延迟存储属性
+延迟存储属性在知道访问时才会去计算.他必须是变量,因为他可能在实例化之后才能使用,而常量必须要在定义时给定值.  
+当实例初始化值依赖于外部条件,而外部条件要等到实例初始化后才能知道的情况下很有用.对于需要使用大量计算才能获取到值得值得属性,而这个值只有在需要用到时才计算的情况下也很有帮助.  
+下面这个例子避免初始化时的复杂操作
+```swift
+class DataImporter {
+    /*
+    这个类从外部导入大量数据,这些操作会耗费很长时间
+     */
+    var fileName = "data.txt"
+    // 其他的操作,这里省略...
+}
+
+class DataManager {
+    lazy var importer = DataImporter()
+    var data = [String]()
+    // 这个类需要使用导入数据实例
+}
+
+let manager = DataManager()
+manager.data.append("Some data")
+manager.data.append("Some more data")
+//因为importer属性是延迟属性,所以这里初始化的时候并不会立刻去做数据导入操作,
+//从而可以直接快速实例化.当用到importer时候再去实例化这个属性.这样可以提高效率.
+```
+### 计算属性
+计算属性并不存储值,它提供`get`和可选的`set`,计算属性可以在 **类,结构体,枚举** 中使用.使用`set`时默认参数名为`newValue`我们可以自定义一个名字.
+```swift
+struct Point {
+    var x = 0.0, y = 0.0
+}
+struct Size {
+    var width = 0.0, height = 0.0
+}
+struct Rect {
+    var origin = Point()
+    var size = Size()
+    var center: Point {
+        get {
+            let centerX = origin.x + (size.width / 2)
+            let centerY = origin.y + (size.height / 2)
+            return Point(x: centerX, y: centerY)
+        }
+        set(newCenter) {//自定义了newCenter代替newValue
+            origin.x = newCenter.x - (size.width / 2)
+            origin.y = newCenter.y - (size.height / 2)
+        }
+    }
+}
+var square = Rect(origin: Point(x: 0.0, y: 0.0), size: Size(width: 10.0, height: 10.0))
+let initialSquareCenter = square.center
+square.center = Point(x: 15.0, y: 15.0)
+print("square.origin is now at (\(square.origin.x), \(square.origin.y))")
+// Prints "square.origin is now at (10.0, 10.0)
+```
+### 只读计算属性
+如果只有`get`没有`set`那么就是一个只读计算属性.对于只读属性可以简化,直接return.
+```swift
+struct Cuboid {
+    var width = 0.0, height = 0.0, depth = 0.0
+    var volume: Double {
+        return width * height * depth
+    }
+}
+let fourByFiveByTwo = Cuboid(width: 4.0, height: 5.0, depth: 2.0)
+print("the volume of fourByFiveByTwo is \(fourByFiveByTwo.volume)")
+// Prints "the volume of fourByFiveByTwo is 40.0
+```
+### 属性观察器
+属性观察器可以设置在任何一个非延迟属性性.他用来监听属性值得变化并作出一些反馈.可以通过重写方式来给继承的属性添加观察器.对于非重写的计算属性,你不需要添加观察器,因为你可以在`set`里面进行操作.  
+属性观察器有两个选择:
+- `willSet`在值被保存之前调用
+- `didSet`在值被保存之后调用
+
+`willSet`默认常量参数名为`newValue`,newValue是新的值,他是即将要设置的值.`didSet`默认常量参数名为`oldValue`,oldValue是属性原来的值.参数名都可以自定义.
+```swift
+class StepCounter {
+    var totalSteps: Int = 0 {
+        willSet(newTotalSteps) {
+            print("新的值为:\(newTotalSteps)")
+        }
+        didSet {
+            print("原始值为:\(oldValue)")
+        }
+    }
+}
+var sc=StepCounter()
+sc.totalSteps=10
+//新的值为:10
+//原始值为:0
+```
+### 全局变量和局部变量
+计算属性和属性观察器都可以用于全局变量和局部变量.全局变量实在function, method, closure, or type context之外定义的变量,局部变量是在function, method, or closure context.内定义的变量.前几章的全局和局部变量,都是 *存储变量*.存储变量和存储属性一样都提供存储空间来并且允许读写.  
+我们可以定义`计算变量`和并且给`存储变量`设置观察器
+
+> 全局常量和变量都是延迟计算的,和延迟属性类似.只不过他们不需要显示使用`lazy`.局部变量永远都不会延迟计算的.
+
+### 类型属性
+实例属性属于实例,类型属性属于类型,无论创建多少个实例,这个属性只会有一个.所有实例共享.存储属性,常量,变量,计算变量都可作为实例属性.   
+类型属性必须初始化.
+### 类型属性定义
+`static`来定义静态或者可变类型属性.对于计算属性可以使用`class`关键字,这样他就可以再子类中被重写.
+```swift
+struct SomeStructure {
+    static var storedTypeProperty = "Some value."
+    static var computedTypeProperty: Int {
+        return 1
+    }
+}
+enum SomeEnumeration {
+    static var storedTypeProperty = "Some value."
+    static var computedTypeProperty: Int {
+        return 6
+    }
+}
+class SomeClass {
+  static var storedTypeProperty = "Some value."
+    static var computedTypeProperty: Int {
+        return 27
+    }
+    class var overrideableComputedTypeProperty: Int {
+        return 107
+    }
+}
+```
+### 类型属性的访问
+类型属性只能通过类型来访问.
+```swift
+struct AudioChannel {
+    static let thresholdLevel = 10
+    static var maxInputLevelForAllChannels = 0
+    var currentLevel: Int = 0 {
+        didSet {
+            if currentLevel > AudioChannel.thresholdLevel {
+                // cap the new audio level to the threshold level
+                currentLevel = AudioChannel.thresholdLevel
+            }
+            if currentLevel > AudioChannel.maxInputLevelForAllChannels {
+                // store this as the new overall maximum input level
+                AudioChannel.maxInputLevelForAllChannels = currentLevel
+            }
+        }
+    }
+}
+```
 ## 方法(Methods)
 ## 下标(Subscripts)
 ## 继承(Inheritance)
