@@ -1754,7 +1754,82 @@ struct AudioChannel {
 }
 ```
 ## 方法(Methods)
+方法与函数定义方式一样.
+### self属性
+每个实例都有一个隐含属性`self`,他完全等于当前实例.可以再函数体内使用`self`来访问实例的属性等.但是`self`并非强制要求写.如果不写swift会假定当前变量是该实例的属性.当时当函数参数名称与属性名称一样时需要`self`来区分.
+```swift
+func increment() {
+    self.count += 1
+}
+//不加self
+func increment() {
+    count += 1
+}
+```
+### 修改值类型的属性值
+枚举和结构体属于值类型,通常不可以直接修改他们的属性值.  
+如果确实需要在方法中修改属性的值,那么需要定义方法为`mutating`,如果用`let`实例化的话, `mutating`方法不可调用,因为该实例的属性不可更改.
+```swift
+struct Point {
+    var x = 0.0, y = 0.0
+    mutating func moveBy(x deltaX: Double, y deltaY: Double) {
+        x += deltaX
+        y += deltaY
+    }
+}
+var somePoint = Point(x: 1.0, y: 1.0)
+somePoint.moveBy(x: 2.0, y: 3.0)
+print("The point is now at (\(somePoint.x), \(somePoint.y))")
+// Prints "The point is now at (3.0, 4.0)
+```
+### 在`mutating`方法中给self赋值
+`mutating`方法中可以给self赋予一个完全新的值,上面的方法可以改写为:
+```swift
+struct Point {
+    var x = 0.0, y = 0.0
+    mutating func moveBy(x deltaX: Double, y deltaY: Double) {
+        self = Point(x: x + deltaX, y: y + deltaY)
+      }
+}
+```
+枚举类型中的`mutating`也可以修改`self`
+```swift
+enum TriStateSwitch {
+    case off, low, high
+    mutating func next() {
+        switch self {
+        case .off:
+            self = .low
+        case .low:
+            self = .high
+        case .high:
+            self = .off
+        }
+    }
+}
+var ovenLight = TriStateSwitch.low
+ovenLight.next()
+// ovenLight is now equal to .high
+ovenLight.next()
+// ovenLight is now equal to .off
+```
+### 类型方法
+通过`static`可以定义类型方法,对于类可以用`class`,来定义类型防范这样子类可以重写它.在类型方法内部`self`指向的是类型本身而不是实例.
+```swift
+class SomeClass {
+    class func someTypeMethod() {
+        // type method implementation goes here
+    }
+}
+SomeClass.someTypeMethod()
+```
+在类型方法内可以直接调用该类型的其他类型方法,而不需要该类型作为前缀.
+
 ## 下标(Subscripts)
+类,枚举,结构体,都可以定义下标访问的快捷方式来访问集合中的元素.我们可以使用下标方式访问设置值,而不需要写独立的访问和设置方法.例如数组可以用 someArray[index]来访问元素,对于字典可以用someDictionary[key].   
+可以定义多个下标方法,通过索引类型来进行重载.也可以自定义多个参数,来满足一些需求.
+### 下标写法
+
 ## 继承(Inheritance)
 ## 构造函数(Initialization)
 ## 析构函数(Deinitialization)
