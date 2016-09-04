@@ -1829,8 +1829,32 @@ SomeClass.someTypeMethod()
 类,枚举,结构体,都可以定义下标访问的快捷方式来访问集合中的元素.我们可以使用下标方式访问设置值,而不需要写独立的访问和设置方法.例如数组可以用 someArray[index]来访问元素,对于字典可以用someDictionary[key].   
 可以定义多个下标方法,通过索引类型来进行重载.也可以自定义多个参数,来满足一些需求.
 ### 下标写法
+`set`的默认参数名为`newValue`,对于只读下标不许要写`set`或者直接用`return`即可
+```swift
+subscript(index: Int) -> Int {
+    get {
+        // return an appropriate subscript value here
+    }
+    set(newValue) {
+        // perform a suitable setting action here
+    }
+}
+
+struct TimesTable {
+    let multiplier: Int
+    subscript(index: Int) -> Int {
+        return multiplier * index
+    }
+}
+let threeTimesTable = TimesTable(multiplier: 3)
+print("six times three is \(threeTimesTable[6])")
+// Prints "six times three is 18
+```
+### 下标选项
+下标方法可以接受任意多个参数.这些参数可以是任意类型的.这个方法的返回值也可以是任意类型.但是不可以使用`in-out`参数,而且参数也不可以有默认值.
 
 ## 继承(Inheritance)
+
 ## 构造函数(Initialization)
 ## 析构函数(Deinitialization)
 ## 自动引用计数(Automatic Reference Counting)
