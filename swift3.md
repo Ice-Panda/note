@@ -1854,8 +1854,47 @@ print("six times three is \(threeTimesTable[6])")
 下标方法可以接受任意多个参数.这些参数可以是任意类型的.这个方法的返回值也可以是任意类型.但是不可以使用`in-out`参数,而且参数也不可以有默认值.
 
 ## 继承(Inheritance)
+### 重写
+子类可以覆盖掉父类的实例方法,类方法,实例属性,下标方法.通过`override`重写.在重写的函数中调用父类的函数通过`super`.    
+可以再子类中给父类的属性重写观察器.
+```swift
+class AutomaticCar: Car {
+    override var currentSpeed: Double {
+        didSet {
+            gear = Int(currentSpeed / 10.0) + 1
+        }
+    }
+}
+```
+重写属性的Getters和Setters
+```swift
+class Car: Vehicle {
+    var gear = 1
+    override var description: String {
+        return super.description + " in gear \(gear)"
+    }
+}
+```
+### 防止重写
+如果不希望被子类重写,需要添加`final`例如`final var, final func, final class func, and final subscript`
 
 ## 构造函数(Initialization)
+### 给存储属性设置初始值
+类和结构体在初始化时必须为所有的存储属性设置初始值.
+#### 构造函数
+没有参数的`init()`.可以在构造函数中给定值,也可以给定在变量声明时默认值
+```swift
+struct Fahrenheit {
+    var temperature: Double
+    init() {
+        temperature = 32.0
+    }
+}
+var f = Fahrenheit()
+print("The default temperature is \(f.temperature)° Fahrenheit")
+// Prints "The default temperature is 32.0° Fahrenheit
+```
+
 ## 析构函数(Deinitialization)
 ## 自动引用计数(Automatic Reference Counting)
 ## 可选链(Optional Chaining)
