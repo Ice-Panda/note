@@ -1894,6 +1894,74 @@ var f = Fahrenheit()
 print("The default temperature is \(f.temperature)° Fahrenheit")
 // Prints "The default temperature is 32.0° Fahrenheit
 ```
+### 自定义构造函数
+构造函数与普通函数类似，可以提供参数，也可以无参数。默认情况下swift会给参数一个默认label，也可以自定义label，与普通函数label一样。`_`表示调用时不需要传递`label`。
+```swift
+struct Celsius {
+    var temperatureInCelsius: Double
+    init(fromFahrenheit fahrenheit: Double) {
+        temperatureInCelsius = (fahrenheit - 32.0) / 1.8
+    }
+    init(fromKelvin kelvin: Double) {
+        temperatureInCelsius = kelvin - 273.15
+    }
+}
+let boilingPointOfWater = Celsius(fromFahrenheit: 212.0)
+// boilingPointOfWater.temperatureInCelsius is 100.0
+let freezingPointOfWater = Celsius(fromKelvin: 273.15)
+// freezingPointOfWater.temperatureInCelsius is 0.0
+```
+### Optional属性
+如果属性在定义时不确定有值，或者在运行当中可能会不存在值，那么可以设置为`Optional`，他不需要在构造时赋值。
+```swift
+class SurveyQuestion {
+    var text: String
+    var response: String?
+    init(text: String) {
+        self.text = text
+    }
+    func ask() {
+        print(text)
+    }
+}
+let cheeseQuestion = SurveyQuestion(text: "Do you like cheese?")
+cheeseQuestion.ask()
+// Prints "Do you like cheese?"
+cheeseQuestion.response = "Yes, I do like cheese.
+```
+### 构造时给常量属性赋值
+在构造函数中给常量属性赋值，一旦赋值后，这个属性的值就不可再修改
+```swift
+class SurveyQuestion {
+    let text: String
+    var response: String?
+    init(text: String) {
+        self.text = text
+    }
+    func ask() {
+        print(text)
+    }
+}
+let beetsQuestion = SurveyQuestion(text: "How about beets?")
+beetsQuestion.ask()
+// Prints "How about beets?"
+beetsQuestion.response = "I also like beets. (But not with cheese.)"
+```
+### 默认构造函数
+如果没有提供自定义构造函数时，swift会提供一个不带任何参数的构造函数。这种情况下必须确保声明变量时已经赋值（除了`Optional`类型）。但是对于结构体类型，构造函数包含了所有属性参数。
+```swift
+class ShoppingListItem {
+    var name: String?
+    var quantity = 1
+    var purchased = false
+}
+var item = ShoppingListItem()
+```
+### 代理构造函数
+构造函数内可以调用其他构造函数，来初始化一些变量，从而达到代码复用。
+### 构造函数的继承和重写
+swift中父类的构造函数不会默认被子类继承。
+
 
 ## 析构函数(Deinitialization)
 ## 自动引用计数(Automatic Reference Counting)
