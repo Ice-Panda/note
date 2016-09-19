@@ -1,5 +1,7 @@
 # Mastering RabbitMQ
 
+这本书适合了解RabbitMQ
+
 ## 开始
 
 ### 使用场景：
@@ -77,9 +79,9 @@ sudo apt-get install rabbitmq-server && sudo rabbitmq-server
 
 ## Architecture and Messaging
 
-### 消息和她的使用场景
+### 消息和它的使用场景
 
-消息在producer和customer之间传输。**Message Broker** 用来控制消息流动。控制并不是很简单的事情，所有broker需要很多额外的信息。下面是消息常见的问题以及broker如何解决他们。
+消息在producer和customer之间传输。**Message Broker** 用来控制消息流动。控制并不是很简单的事情，所以broker需要很多额外的信息。下面是消息常见的问题以及broker如何解决他们。
 
 #### 关联软件系统
 
@@ -122,14 +124,14 @@ Producer创建消息，然后消息到达Exchange，然后路由到Queue。
 
 ### Message Flow
 
-Producer-->Exchange-->Queue--Cconsumer
+Producer-->Exchange-->Queue--Consumer
 
 ### Exchange
 
-Exchange将消息路由到Queue，路由规则有Bindings来定义。它包含几个重要属性：
+Exchange将消息路由到Queue，路由规则由Bindings来定义。它包含几个重要属性：
 
 - Name：通常服务器会自动指定名字
-- Durable：消息队列是否保持，依赖于是否设置为持久或者临时
+- Durable：消息队列是否持久，依赖于是否设置为持久或者临时(broker重启时是否自动创建他)
 - Auto-delete：当所有队列完成时，是否自动删除exchange
 
 ### Message Queue
@@ -439,7 +441,7 @@ RabbitMQ支持的管理特性：
 - `change_password <username> <password>`:修改用户密码
 - `clear_password <username>`:清楚用户的密码
 - `set_user_tags <username> <tag>`:给用户设置一个tag
-- list_users:显示所有的用户
+- `list_users`:显示所有的用户
 
 #### 虚拟主机和权限
 
@@ -465,9 +467,9 @@ RabbitMQ支持的管理特性：
 - `list_connections [<connectioninfoitem>...]`:显示所有的链接信息
 - `list_consumers [-p <vhostpath>]`:显示所有的consumer
 - `list_channels [<channnelinfoitem>...]`:显示所有的channel信息
-- status:显示当前的RabbitMQ broker状态
-- environment:显示环境变量
-- report:生成一个系统报告到文件中：`rabbitmqctl report > report.txt`
+- `status`:显示当前的RabbitMQ broker状态
+- `environment`:显示环境变量
+- `report`:生成一个系统报告到文件中：`rabbitmqctl report > report.txt`
 - `eval <expr>`:执行Erlang表达式
 - `close_connnection <connectionpid> <explanation>`:根据Erlang进程ID关闭链接
 - `trace_on [-p <vhost>]`:启动跟踪，如果指定了vhost那么只会跟踪该虚拟主机
@@ -744,9 +746,11 @@ while True:
     schedule.run_pending()
     time.sleep(1)
 ```
+
 ### Celery其他特性
-定时任务,类似于cron的表达式结构
-`celery -A proj cron.py`
+
+定时任务,类似于cron的表达式结构 `celery -A proj cron.py`
+
 ```python
 fromcelery.schedules import crontab
 CELERYBEAT_SCHEDULE = {
