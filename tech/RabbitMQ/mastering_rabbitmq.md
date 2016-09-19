@@ -496,7 +496,7 @@ RabbitMQ支持的管理特性：
 
 `pip install pika`
 
-### 构建Client
+### 构建Producer
 
 ```python
 #!/usr/bin/env python
@@ -511,6 +511,250 @@ channel.basic_publish(exchange='',routing_key='pages',body='testing: 1, 2, 3')
 print "* Done sending!"
 connection.close()
 ```
-上面使用的是block链接，也可以选择non-blocking链接`Select connection`。
 
-下一步建立channel，
+上面使用的是block链接，也可以选择non-blocking链接`Select connection`。下一步建立channel，声明queue，发送消息。
+
+### 构建Consumer
+
+```python
+import pika
+def handler(ch,method,properties,body):
+    print("-> Handled: [%s] " % body)
+connection=pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel=connection.channel()
+print("Handling messages.")
+channel.basic_consume(handler,queue='pages',no_ack=True)
+channel.start_consuming()
+```
+
+和producer不同的是，consumer鉴定queue已经存在了，所有没有再次声明他。
+
+### 定时任务[schedule](https://github.com/dbader/schedule)
+
+`pip install schedule`
+
+```python
+import schedule
+import time
+
+def job():
+    print("I'm working...")
+
+schedule.every(10).minutes.do(job)
+schedule.every().hour.do(job)
+schedule.every().day.at("10:30").do(job)
+schedule.every().monday.do(job)
+schedule.every().wednesday.at("13:15").do(job)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+# 这个循环结构类似于启动一个守护进程永不退出
+```
+
+下面每5秒发送一条消息
+
+```python
+#!/usr/bin/env python
+importpika
+import schedule
+import time
+urls = [ "http://ebay.to/1G163Lh" ]
+print "* Connecting to RabbitMQ broker"
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel = connection.channel()
+channel.queue_declare(queue='pages')
+def produce():
+    for url in urls:
+        print("* Pushed: [%s]" % (url))
+        channel.basic_publish(exchange='', routing_key='pages', body=url)
+
+schedule.every(5).seconds.do(produce)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+
+connection.close()
+```
+
+### 错误处理，使用acknowledgement
+
+当使用no_ack=False模式时，会确保消息被处理，否则消息会保存下来，继续留在队列中。
+
+```python
+import pika
+def handler(ch,method,properties,body):
+    print("-> Handled: [%s] " % body)
+connection=pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+channel=connection.channel()
+print("Handling messages.")
+channel.basic_consume(handler,queue='pages',no_ack=False)
+channel.start_consuming()
+```
+
+### Pika Api
+
+#### Connecting
+
+一种方式是通过ConnectionParameters来指定链接参数，另一种是给定义包含所有需要参数的URL。
+
+**pika.URLParameters('amqps://www:pwd@rabbit1/web_messages')**
+
+`amqps://www-data:rabbit_pwd@rabbit1/web_messages`这个配置URL指定连接到rabbit1服务器下的web_messages虚拟主机。
+
+`amqps://www-data:rabbit_pwd@rabbit1/web_messages?heartbeat_interval=30`这个参数指定heartbeat_interval为30
+
+`amqp://www-data:rabbit_pwd@rabbit1/web_messages?heartbeat_interval=30&ssl_options=%7B%27keyfile%27%3A+%27%2Fetc%2Fssl%2Fmyey.pem%27%2C+%27certfile%27%3A+%27%2Fetc%2Fssl%2Fmycert.pem%27%7D`指定了ssl的参数
+
+其他可用的参数：
+
+- backpressure_detection:默认禁用，
+- channel_ma:channel允许的最大链接数
+- channel_attempts:默认1
+- frame_max:frame的最大值
+- heartbeat_interval:client/server heartbeat interval，以前5比较合适，现在一般是30
+- locale:客户端的locale
+- retry_delay:再次尝试链接的时间间隔，通常和chanel_attempts一起使用
+- socket_timeou:默认0.25
+- ssl_options:URL编码字典keys: ca_certs, cert_reqs, certfile, keyfile, ssl_version.
+
+**pika.ConnectionParameters(host='localhost',heartbeat_interval=30,retry_delay=2)**
+
+### BlockingConnection
+
+常用属性：
+
+- add_backpressure_callback:添加回调函数，当客户端接受到broker的backpresure事件是执行的回调
+- basic_nack:broker是否支持nack
+- channel:创建新的channel
+- close:关闭连接
+- is_closed/is_closing/is_open:检查连接状态
+
+### BlockingChannel
+
+- add_on_close_callback:添加channel关闭时的回调函数
+- add_on_flow_callback:添加回调函数，当客户端接受到flow control事件时
+- add_on_return_callback:添加回调，当发送消息的客户端，收到来自服务端的拒绝时。这个回调函数用处很大，如果不这么做的话可能使系统隐藏大的bug
+- basic_ack/basic_nack:这是很重的一个属性。如果你使用acknowledge的话必须使用这个属性。当调用他时，必须指定`delivery_tag`，他会在consumer的处理函数中传递。
+- basic_consume:这是另一个重要的属性。它的参数
+
+  - consumer_callback:毁掉函数
+  - queue:队列名称
+  - no_ack:是否使用acknowledge
+  - exclusive:means not to allow any other on this queue
+  - consumer_tag:通常不用
+  - arguments:自定的参数，通常不用
+
+- badic_get:和basic_consume类似，但是他只接受一条消息，包括queue和no_ack参数
+
+- basic_publish:
+
+  - exchage:用来发布消息
+  - routing_key:用来绑定的路由key
+  - body:消息内容
+  - mandatory:如果false，服务器会直接丢弃掉不能路由到队列的消息，否则想客户端发回消息。
+  - Immediate:和前面类似，但是服务器不保证消息放入到路由到队列中
+  - basic_qos:
+  - prefetch_size:
+  - prefetch_count:
+  - all_channels:将规则应用到所有channel
+  - basic_recover:告诉服务器重新发送所有没有收到确认的消息
+
+### Delcaring queues and exchanges
+
+- exchange_declare:如果exchange不存在的话就创建。如果exchange已经存在，再次声明时如果使用了不同的参数，就会报错：
+
+  - exchange：名称
+  - exchange_type:类型
+  - passive:检查exchange是否存在，不存在则创建
+  - durable:将他设置为永久性，broker重启时他会自动被创建
+  - auto_delete:没有队列绑定时，自动删除
+  - internal:This can only be published into by other exchanges
+
+- queue_declare:如果不存在则创建，
+
+  - queue:名称
+  - passive:passive名称
+  - durable:永久性，broker重启时自动创建
+  - exclusive:允许在consumer之间共享
+  - auto_delete:当一个consumer断开连接时删除掉
+
+- queue_bind:
+
+  - queue:队列名
+  - exchange:exchange名
+  - routing_key:路由key
+  - no_wait:不等待绑定是否完成
+
+### 授权
+
+普通授权
+
+```python
+import pika
+credentials = pika.PlainCredentials('guest','guest')
+parameters = pika.ConnectionParameters('rabbit1',5672,'/',credentials)
+```
+
+ssl连接，使用URLParameters。`amqps_URI = "amqps://user:pass@host:10000/vhost"`
+
+```python
+ ssl_options = ({"ca_certs": "caroot.pem",
+                  "certfile": "client.pem",
+                  "keyfile": "key.pem"})
+parameters = pika.ConnectionParameters(host,5671,credentials=ExternalCredentials(),ssl=True,ssl_options=ssl_options)
+```
+
+### Celery
+
+consumer.py
+
+```python
+#!/usr/bin/env python
+import requests
+fromBeautifulSoup import BeautifulSoup
+from celery import Celery
+app = Celery('celery_pages', broker='amqp://guest@localhost//')
+@app.task
+def scrape(url):
+    print "-> Starting: [%s]" % (url)
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text)
+    print "-> Extracted: %s" % (soup.html.head.title)
+    print "-> Done: [%s]" % (url)
+```
+
+producer.py
+
+```python
+#!/usr/bin/env python
+import schedule
+import time
+from celery import Celery
+from celery_scraper import scrape
+app = Celery('celery_pages', broker='amqp://guest@localhost//')
+urls = [ "http://ebay.to/1G163Lh" ]
+def produce():
+    forurl in urls:
+    scrape.delay(url)
+    print("* Submitted: [%s]" % (url))
+
+schedule.every(10).seconds.do(produce)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+```
+### Celery其他特性
+定时任务,类似于cron的表达式结构
+`celery -A proj cron.py`
+```python
+fromcelery.schedules import crontab
+CELERYBEAT_SCHEDULE = {
+    # Executes every Monday morning at 7:30 A.M
+    'add-every-monday-morning': {
+        'task': 'tasks.add',
+        'schedule': crontab(hour=7, minute=30, day_of_week=1),
+        'args': (16, 16),
+    },
+}
+```
