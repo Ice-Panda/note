@@ -9,15 +9,15 @@ import time
 
 def worker():
     print(threading.currentThread().getName(), 'Starting')
-    # time.sleep(2)
+    time.sleep(2)
     print(threading.currentThread().getName(), 'Exting')
 
 
 def myservice():
     print(threading.currentThread().getName(), 'Starting')
-    # time.sleep(3)
+    time.sleep(3)
     print(threading.currentThread().getName(), 'Exiting')
 
 t=threading.Thread(target=worker,name='worker').start()
-s=threading.Thread(target=myservice,name='worker').start()
-s2=threading.Thread(target=myservice).start()
+s=threading.Thread(target=myservice,name='service').start()
+# s2=threading.Thread(target=myservice).start()
