@@ -558,7 +558,7 @@ while True:
 
 ```python
 #!/usr/bin/env python
-importpika
+import pika
 import schedule
 import time
 urls = [ "http://ebay.to/1G163Lh" ]
@@ -752,7 +752,7 @@ while True:
 定时任务,类似于cron的表达式结构 `celery -A proj cron.py`
 
 ```python
-fromcelery.schedules import crontab
+from celery.schedules import crontab
 CELERYBEAT_SCHEDULE = {
     # Executes every Monday morning at 7:30 A.M
     'add-every-monday-morning': {
