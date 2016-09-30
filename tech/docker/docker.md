@@ -219,4 +219,86 @@ $ docker run -it -v /home/:/opt/webapp:ro training/webapp /bin/bash
 如果你有一个永久性的数据希望在容器之间共享，
 
 # Dockerfile 编写
-# 
+
+docker通过dockerfile以及上下文生成image，上下文可以是本地PATH，也可以是git仓库URL。PATH会包含下级目录，URL会包含下级model。最简单的当前目录`docker build .`。
+
+默认会直接使用当前目录显得`Dockerfile`，也可以`-f path/Dockerfile`来指定Dockerfile。
+
+## 格式
+
+```
+# Comment
+INSTRUCTION arguments
+```
+
+## 环境替换
+
+环境变量可以在定义后通过`${variable_name}`或者`$variable_name`调用。如果需要转义使用`\`。
+
+`ADD，COPY，ENV，EXPOSE，LABEL，USER，WORKDIR，VOLUME，STOPSIGNAL`都可以使用环境变量。
+
+```
+FROM busybox
+ENV foo /bar
+WORKDIR ${foo}   # WORKDIR /bar
+ADD . $foo       # ADD . /bar
+COPY \$foo /quux # COPY $foo /quux
+
+ENV abc=hello
+ENV abc=bye def=$abc
+ENV ghi=$abc
+# def=hello ghi=bye abc=bye
+```
+
+## FROM
+
+FROM设置基础镜像，dockerfile的第一个指令必须是FROM。tag和digest可以不指定，默认tag是latest。
+
+```
+FROM <image>
+FROM <image>:<tag>
+FROM <image>@<digest>
+```
+
+## MAINTAINER
+
+指定镜像所有者
+
+```
+MAINTAINER <name>
+```
+
+## RUN
+
+执行shell命令`RUN /bin/bash -c 'source $HOME/.bashrc ; echo $HOME'`
+
+## CMD
+
+Dockerfile只能又一个CMD指令，如果有多个那么只有最后一条有效。CMD用来给容器指定默认的运行命令。用户可以在`docker run`自定来覆盖掉默认命令。
+
+```
+FROM ubuntu
+CMD echo "This is a test." | wc -
+```
+
+## ADD
+
+将当前系统的文件拷贝到容器中,可以使用GO的模式匹配
+
+```
+ADD hom* /mydir/        # adds all files starting with "hom"
+ADD hom?.txt /mydir/    # ? is replaced with any single character, e.g., "home.txt"
+```
+
+## COPY
+
+和ADD类似
+
+## ENTRYPOINT
+
+与CMD类似
+
+## VOLUME
+
+挂载一个目录或文件
+`VOLUME ["/data"]`
