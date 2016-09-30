@@ -585,3 +585,71 @@ Attribute 是由 HTML 定义的。 Property 是由 DOM(Document Object Model) �
 ## Attribute 、 Class 和 Style 绑定
 
 模板语法为那些不太适合使用属性绑定的场景提供了专门的单向数据绑定形式。
+
+```
+<table border=1>
+  <!--  expression calculates colspan=2 -->
+  <tr><td [attr.colspan]="1 + 1">One-Two</td></tr>
+
+  <!-- ERROR: There is no `colspan` property to set!
+    <tr><td colspan="{{1 + 1}}">Three-Four</td></tr>
+  -->
+
+  <tr><td>Five</td><td>Six</td></tr>
+</table>
+```
+
+```
+<!-- toggle the "special" class on/off with a property -->
+<div [class.special]="isSpecial">The class binding is special</div>
+
+<!-- binding to `class.special` trumps the class attribute -->
+<div class="special"
+     [class.special]="!isSpecial">This one is not so special</div>
+```
+
+```
+<button [style.color] = "isSpecial ? 'red': 'green'">Red</button>
+<button [style.background-color]="canSave ? 'cyan': 'grey'" >Save</button>
+```
+
+## 事件绑定
+`<button (click)="onSave()">Save</button>`等同于`<button on-click="onSave()">On Save</button>`
+元素事件可能是更常见的目标，但 Angular 会先看这个名字是否能匹配上已知指令的事件属性,别名 input/output 属性 章节有更多关于该 myClick 指令的解释。
+```
+<!-- `myClick` is an event on the custom `MyClickDirective` -->
+<div (myClick)="clickMessage=$event">click with myClick</div>
+```
+### $event 和事件处理语句
+`$event`就是一个 DOM 事件对象 ，它有像 target 和 target.value
+```
+<input [value]="currentHero.firstName"
+       (input)="currentHero.firstName=$event.target.value" >
+```
+
+### 使用 EventEmitter 实现自定义事件
+要用到`@output()`,在自身内部触发事件，然后通知他的父级执行相应的方法
+
+```
+template: `
+<div>
+  <img src="{{heroImageUrl}}">
+  <span [style.text-decoration]="lineThrough">
+    {{prefix}} {{hero?.fullName}}
+  </span>
+  <button (click)="delete()">Delete</button>
+</div>`
+//这里是在hero-detail组件
+
+// This component make a request but it can't actually delete a hero.
+deleteRequest = new EventEmitter<Hero>();
+
+//button点击后触发deleteRequest
+delete() {
+  this.deleteRequest.emit(this.hero);
+}
+
+//下面是父级组件调用
+<hero-detail (deleteRequest)="deleteHero($event)" [hero]="currentHero"></hero-detail>
+
+```
