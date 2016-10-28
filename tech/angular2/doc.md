@@ -614,20 +614,25 @@ Attribute 是由 HTML 定义的。 Property 是由 DOM(Document Object Model) �
 ```
 
 ## 事件绑定
-`<button (click)="onSave()">Save</button>`等同于`<button on-click="onSave()">On Save</button>`
-元素事件可能是更常见的目标，但 Angular 会先看这个名字是否能匹配上已知指令的事件属性,别名 input/output 属性 章节有更多关于该 myClick 指令的解释。
+
+`<button (click)="onSave()">Save</button>`等同于`<button on-click="onSave()">On Save</button>` 元素事件可能是更常见的目标，但 Angular 会先看这个名字是否能匹配上已知指令的事件属性,别名 input/output 属性 章节有更多关于该 myClick 指令的解释。
+
 ```
 <!-- `myClick` is an event on the custom `MyClickDirective` -->
 <div (myClick)="clickMessage=$event">click with myClick</div>
 ```
+
 ### $event 和事件处理语句
+
 `$event`就是一个 DOM 事件对象 ，它有像 target 和 target.value
+
 ```
 <input [value]="currentHero.firstName"
        (input)="currentHero.firstName=$event.target.value" >
 ```
 
 ### 使用 EventEmitter 实现自定义事件
+
 要用到`@output()`,在自身内部触发事件，然后通知他的父级执行相应的方法
 
 ```
@@ -651,5 +656,248 @@ delete() {
 
 //下面是父级组件调用
 <hero-detail (deleteRequest)="deleteHero($event)" [hero]="currentHero"></hero-detail>
+```
+
+# 使用 NgModel 进行双向数据绑定
+
+> 要使用 ngModel 做双向数据绑定，得先把 FormsModule 导入我们的模块并把它加入 NgModule 装饰器的 imports 数组。
+
+```javascript
+import { NgModule } from '@angular/core';
+import { BrowserModule }  from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { AppComponent } from './app.component';
+@NgModule({
+  imports: [
+    BrowserModule,
+    FormsModule
+  ],
+  declarations: [
+    AppComponent
+  ],
+  bootstrap: [ AppComponent ]
+})
+export class AppModule { }
+```
+
+## [(ngModel)] 内幕
+
+通过分别绑定到
+
+<input>
+
+元素的 value 属性和 input 事件，我们能达到同样的效果
+
+```html
+<input [value]="currentHero.firstName" (input)="currentHero.firstName=$event.target.value" >
+
+<input [ngModel]="currentHero.firstName" (ngModelChange)="currentHero.firstName=$event">
+<!-- ngModel 输入属性设置元素的值属性，而 ngModelChange 输出属性监听元素值的变化。 实现细节对每种元素都很特定，所以 NgModel 指令只和元素一起工作，比如输入框， -->
+```
+
+`<input [(ngModel)]="currentHero.firstName">`
+
+> [(ngModel)] 是一个更通用的模式中的具体例子，在这里， Angular 会把 [(x)] 语法去掉语法糖，变成了一个供属性绑定用的输入属性 x ，和一个供事件绑定用的输出属性 xChange 。 Angular 通过在模板表达式的原始字符串后面追加上 =$event ，来构建出供事件绑定用的模板语句。利用这一行为，我们也可以自己写出具有双向绑定功能的指令。[(x)]="e" <==> [x]="e" (xChange)="e=$event"
+
+如果需要强制将input值做修改，可以使用`<input [ngModel]="currentHero.firstName" (ngModelChange)="setUpperCaseFirstName($event)">`这里强制将输入大写。
+
+## 内置指令
+
+### NgClass
+
+CSS 类绑定 是添加或删除 单个 类的最佳途径。
+
+```javascript
+<div [class.special]="isSpecial">The class binding is special</div>
+```
+
+当我们想要同时添加或移除 多个 CSS 类时， NgClass 指令可能是更好的选择。绑定到一个 key:value 形式的控制对象，是应用 NgClass 的好方式。这个对象中的每个 key 都是一个 CSS 类名，如果它的 value 是 true ，这个类就会被加上，否则就会被移除。
+
+```javascript
+setClasses() {
+  let classes =  {
+    saveable: this.canSave,      // true
+    modified: !this.isUnchanged, // false
+    special: this.isSpecial,     // true
+  };
+  return classes;
+}
+
+<div [ngClass]="setClasses()">This div is saveable and special</div>
+```
+
+### NgStyle
+
+样式绑定 是设置 单一 样式值的简单方式。
+
+```javascript
+<div [style.font-size]="isSpecial ? 'x-large' : 'smaller'" >
+  This div is x-large.
+</div>
+```
+
+如果我们要同时设置 多个 内联样式， NgStyle 指令可能是更好的选择。我们通过把它绑定到一个 key:value 控制对象的形式使用 NgStyle 。 对象的每个 key 是样式名，它的 value 就是能用于这个样式的任何值。考虑一个类似于 setStyles 的组件方法，它返回一个定义三种样式的对象：
+
+```javascript
+setStyles() {
+  let styles = {
+    // CSS property names
+    'font-style':  this.canSave      ? 'italic' : 'normal',  // italic
+    'font-weight': !this.isUnchanged ? 'bold'   : 'normal',  // normal
+    'font-size':   this.isSpecial    ? '24px'   : '8px',     // 24px
+  };
+  return styles;
+}
+<div [ngStyle]="setStyles()">
+  This div is italic, normal weight, and extra large (24px).
+</div>
+```
+
+### NgIf
+
+可见性和 NGIF 不是一回事
+
+```javascript
+<!-- isSpecial is true -->
+<div [class.hidden]="!isSpecial">Show with class</div>
+<div [class.hidden]="isSpecial">Hide with class</div>
+
+<!-- HeroDetail is in the DOM but hidden -->
+<hero-detail [class.hidden]="isSpecial"></hero-detail>
+
+<div [style.display]="isSpecial ? 'block' : 'none'">Show with style</div>
+<div [style.display]="isSpecial ? 'none'  : 'block'">Hide with style</div>
+```
+
+### ngSwitch
+
+```javascript
+<span [ngSwitch]="toeChoice">
+  <span *ngSwitchCase="'Eenie'">Eenie</span>
+  <span *ngSwitchCase="'Meanie'">Meanie</span>
+  <span *ngSwitchCase="'Miney'">Miney</span>
+  <span *ngSwitchCase="'Moe'">Moe</span>
+  <span *ngSwitchDefault>other</span>
+</span>
+```
+
+### NgFor
+
+`<div *ngFor="let hero of heroes; let i=index">{{i + 1}} - {{hero.fullName}}</div>`
+
+ngFor 指令有时候会性能较差，特别是在大型列表中。 对一个条目的一点小更改、移除或添加，都会导致级联的 DOM 操作。我们给它一个 追踪 函数， Angular 就可以避免这种折腾。追踪函数告诉 Angular ：我们知道两个具有相同 hero.id 的对象其实是同一个英雄。 下面就是这样一个函数:
+
+```javascript
+trackByHeroes(index: number, hero: Hero) { return hero.id; }
+<div *ngFor="let hero of heroes; trackBy:trackByHeroes">({{hero.id}}) {{hero.fullName}}</div>
+```
+
+### `*` 与 <template>
+
+`*`是一种语法糖，它让那些需要借助模板来修改`HTML`布局的指令更易于读写。 NgFor 、 NgIf 和 NgSwitch 都会添加或移除元素子树，这些元素子树被包裹在 `<template>` 标签
+
+我们没有看到`<template>` 标签，那是因为这种 `*` 前缀语法让我们忽略了这个标签，而把注意力直接聚焦在所要包含、排除或重复的那些`HTML`元素上。
+
+```html
+<hero-detail template="ngIf:currentHero" [hero]="currentHero"></hero-detail>
+
+<template [ngIf]="currentHero">
+  <hero-detail [hero]="currentHero"></hero-detail>
+</template>
+
+
+<span [ngSwitch]="toeChoice">
+  <!-- with *NgSwitch -->
+  <span *ngSwitchCase="'Eenie'">Eenie</span>
+  <span *ngSwitchCase="'Meanie'">Meanie</span>
+  <span *ngSwitchCase="'Miney'">Miney</span>
+  <span *ngSwitchCase="'Moe'">Moe</span>
+  <span *ngSwitchDefault>other</span>
+
+  <!-- with <template> -->
+  <template [ngSwitchCase]="'Eenie'"><span>Eenie</span></template>
+  <template [ngSwitchCase]="'Meanie'"><span>Meanie</span></template>
+  <template [ngSwitchCase]="'Miney'"><span>Miney</span></template>
+  <template [ngSwitchCase]="'Moe'"><span>Moe</span></template>
+  <template ngSwitchDefault><span>other</span></template>
+</span>
+
+
+<hero-detail template="ngFor let hero of heroes; trackBy:trackByHeroes" [hero]="hero"></hero-detail>
+<template ngFor let-hero [ngForOf]="heroes" [ngForTrackBy]="trackByHeroes">
+  <hero-detail [hero]="hero"></hero-detail>
+</template>
+
+```
+
+## 模板引用变量
+
+`ref-`和`#`定义效果一致
+
+```javascript
+<!-- phone refers to the input element; pass its `value` to an event handler -->
+<input #phone placeholder="phone number">
+<button (click)="callPhone(phone.value)">Call</button>
+
+<!-- fax refers to the input element; pass its `value` to an event handler -->
+<input ref-fax placeholder="fax number">
+<button (click)="callFax(fax.value)">Fax</button>
+```
+
+### NgForm 和模板引用变量
+
+```javascript
+<form (ngSubmit)="onSubmit(theForm)" #theForm="ngForm">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input class="form-control" name="name" required [(ngModel)]="currentHero.firstName">
+  </div>
+  <button type="submit" [disabled]="!theForm.form.valid">Submit</button>
+</form>
+```
+
+## 声明输入和输出属性
+
+```javascript
+@Input()  hero: Hero;
+@Output() deleteRequest = new EventEmitter<Hero>();
+//或者
+@Component({
+  inputs: ['hero'],
+  outputs: ['deleteRequest'],
+})
+```
+输入属性通常接收数据值。 输出属性暴露事件生产者，比如 EventEmitter 对象。
+
+### 输入 / 输出属性别名
+
+```javascript
+@Output('myClick') clicks = new EventEmitter<string>(); //  @Output(alias) propertyName = ...
+<div (myClick)="clickMessage=$event">click with myClick</div>
+
+@Directive({
+  outputs: ['clicks:myClick']  // propertyName:alias
+})
+```
+
+## 管道
+
+```
+<!-- Pipe chaining: convert title to uppercase, then to lowercase -->
+<div>
+  Title through a pipe chain:
+  {{title | uppercase | lowercase}}
+</div>
+```
+
+## 安全导航操作符 ( ?. ) 和空属性路径
+
+```
+The current hero's name is {{currentHero?.firstName}}
+
+<!--No hero, div not displayed, no error -->
+<div *ngIf="nullHero">The null hero's name is {{nullHero.firstName}}</div>
+
+The null hero's name is {{nullHero && nullHero.firstName}}
 
 ```
