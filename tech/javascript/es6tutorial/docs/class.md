@@ -304,7 +304,7 @@ class Foo {}
 }
 ```
 
-上面的代码不会报错，因为`class`继承`Foo`的时候，`Foo`已经有定义了。但是，如果存在`class`的提升，上面代码就会报错，因为`class`会被提升到代码头部，而`let`命令是不提升的，所以导致`class`继承`Foo`的时候，`Foo`还没有定义。
+上面的代码不会报错，因为`Bar`继承`Foo`的时候，`Foo`已经有定义了。但是，如果存在`class`的提升，上面代码就会报错，因为`class`会被提升到代码头部，而`let`命令是不提升的，所以导致`Bar`继承`Foo`的时候，`Foo`还没有定义。
 
 ### Class表达式
 
@@ -624,9 +624,11 @@ class B {
 
 // B的实例继承A的实例
 Object.setPrototypeOf(B.prototype, A.prototype);
+const b = new B();
 
-// B继承A的静态属性
+// B的实例继承A的静态属性
 Object.setPrototypeOf(B, A);
+const b = new B();
 ```
 
 《对象的扩展》一章给出过`Object.setPrototypeOf`方法的实现。
@@ -759,7 +761,7 @@ new A() // A
 new B() // B
 ```
 
-上面代码中，`new.target`指向当前正在执行的函数名。可以看到，在`super()`执行时，它指向的是子类`B`的构造函数，而不是父类`A`的构造函数。也就是说，`super()`内部的`this`指向的是`B`。
+上面代码中，`new.target`指向当前正在执行的函数。可以看到，在`super()`执行时，它指向的是子类`B`的构造函数，而不是父类`A`的构造函数。也就是说，`super()`内部的`this`指向的是`B`。
 
 作为函数时，`super()`只能用在子类的构造函数之中，用在其他地方就会报错。
 
@@ -772,6 +774,8 @@ class B extends A {
   }
 }
 ```
+
+上面代码中，`super()`用在`B`类的`m`方法之中，就会造成句法错误。
 
 第二种情况，`super`作为对象时，指向父类的原型对象。
 
@@ -833,7 +837,7 @@ let b = new B();
 
 上面代码中，属性`x`是定义在`A.prototype`上面的，所以`super.x`可以取到它的值。
 
-ES6 有一个特别规定，就是通过`super`调用父类的方法时，`super`会绑定子类的`this`。
+ES6 规定，通过`super`调用父类的方法时，`super`会绑定子类的`this`。
 
 ```javascript
 class A {

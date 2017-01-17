@@ -1,12 +1,10 @@
 # Module
 
-ES6的Class只是面向对象编程的语法糖，升级了ES5的构造函数的原型链继承的写法，并没有解决模块化问题。Module功能就是为了解决这个问题而提出的。
+历史上，JavaScript 一直没有模块（module）体系，无法将一个大程序拆分成互相依赖的小文件，再用简单的方法拼装起来。其他语言都有这项功能，比如 Ruby 的`require`、Python 的`import`，甚至就连 CSS 都有`@import`，但是 JavaScript 任何这方面的支持都没有，这对开发大型的、复杂的项目形成了巨大障碍。
 
-历史上，JavaScript一直没有模块（module）体系，无法将一个大程序拆分成互相依赖的小文件，再用简单的方法拼装起来。其他语言都有这项功能，比如Ruby的`require`、Python的`import`，甚至就连CSS都有`@import`，但是JavaScript任何这方面的支持都没有，这对开发大型的、复杂的项目形成了巨大障碍。
+在 ES6 之前，社区制定了一些模块加载方案，最主要的有 CommonJS 和 AMD 两种。前者用于服务器，后者用于浏览器。ES6 在语言标准的层面上，实现了模块功能，而且实现得相当简单，完全可以取代现有的 CommonJS 和 AMD 规范，成为浏览器和服务器通用的模块解决方案。
 
-在ES6之前，社区制定了一些模块加载方案，最主要的有CommonJS和AMD两种。前者用于服务器，后者用于浏览器。ES6在语言规格的层面上，实现了模块功能，而且实现得相当简单，完全可以取代现有的CommonJS和AMD规范，成为浏览器和服务器通用的模块解决方案。
-
-ES6模块的设计思想，是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量。CommonJS和AMD模块，都只能在运行时确定这些东西。比如，CommonJS模块就是对象，输入时必须查找对象属性。
+ES6 模块的设计思想，是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量。CommonJS 和 AMD 模块，都只能在运行时确定这些东西。比如，CommonJS 模块就是对象，输入时必须查找对象属性。
 
 ```javascript
 // CommonJS模块
@@ -19,36 +17,26 @@ let stat = _fs.stat, exists = _fs.exists, readfile = _fs.readfile;
 
 上面代码的实质是整体加载`fs`模块（即加载`fs`的所有方法），生成一个对象（`_fs`），然后再从这个对象上面读取3个方法。这种加载称为“运行时加载”，因为只有运行时才能得到这个对象，导致完全没办法在编译时做“静态优化”。
 
-ES6模块不是对象，而是通过`export`命令显式指定输出的代码，输入时也采用静态命令的形式。
+ES6 模块不是对象，而是通过`export`命令显式指定输出的代码，再通过`import`命令输入。
 
 ```javascript
 // ES6模块
 import { stat, exists, readFile } from 'fs';
 ```
 
-上面代码的实质是从`fs`模块加载3个方法，其他方法不加载。这种加载称为“编译时加载”，即ES6可以在编译时就完成模块加载，效率要比CommonJS模块的加载方式高。当然，这也导致了没法引用ES6模块本身，因为它不是对象。
+上面代码的实质是从`fs`模块加载3个方法，其他方法不加载。这种加载称为“编译时加载”或者静态加载，即 ES6 可以在编译时就完成模块加载，效率要比 CommonJS 模块的加载方式高。当然，这也导致了没法引用 ES6 模块本身，因为它不是对象。
 
-由于ES6模块是编译时加载，使得静态分析成为可能。有了它，就能进一步拓宽JavaScript的语法，比如引入宏（macro）和类型检验（type system）这些只能靠静态分析实现的功能。
+由于 ES6 模块是编译时加载，使得静态分析成为可能。有了它，就能进一步拓宽 JavaScript 的语法，比如引入宏（macro）和类型检验（type system）这些只能靠静态分析实现的功能。
 
-除了静态加载带来的各种好处，ES6模块还有以下好处。
+除了静态加载带来的各种好处，ES6 模块还有以下好处。
 
-- 不再需要UMD模块格式了，将来服务器和浏览器都会支持ES6模块格式。目前，通过各种工具库，其实已经做到了这一点。
-- 将来浏览器的新API就能用模块格式提供，不再必要做成全局变量或者`navigator`对象的属性。
+- 不再需要`UMD`模块格式了，将来服务器和浏览器都会支持 ES6 模块格式。目前，通过各种工具库，其实已经做到了这一点。
+- 将来浏览器的新 API 就能用模块格式提供，不再必须做成全局变量或者`navigator`对象的属性。
 - 不再需要对象作为命名空间（比如`Math`对象），未来这些功能可以通过模块提供。
-
-浏览器使用ES6模块的语法如下。
-
-```html
-<script type="module" src="foo.js"></script>
-```
-
-上面代码在网页中插入一个模块`foo.js`，由于`type`属性设为`module`，所以浏览器知道这是一个ES6模块。
-
-Node的默认模块格式是CommonJS，目前还没决定怎么支持ES6模块。所以，只能通过Babel这样的转码器，在Node里面使用ES6模块。
 
 ## 严格模式
 
-ES6的模块自动采用严格模式，不管你有没有在模块头部加上`"use strict";`。
+ES6 的模块自动采用严格模式，不管你有没有在模块头部加上`"use strict";`。
 
 严格模式主要有以下限制。
 
@@ -68,13 +56,13 @@ ES6的模块自动采用严格模式，不管你有没有在模块头部加上`"
 - 不能使用`fn.caller`和`fn.arguments`获取函数调用的堆栈
 - 增加了保留字（比如`protected`、`static`和`interface`）
 
-上面这些限制，模块都必须遵守。由于严格模式是ES5引入的，不属于ES6，所以请参阅相关ES5书籍，本书不再详细介绍了。
+上面这些限制，模块都必须遵守。由于严格模式是 ES5 引入的，不属于 ES6，所以请参阅相关 ES5 书籍，本书不再详细介绍了。
 
-## export命令
+## export 命令
 
 模块功能主要由两个命令构成：`export`和`import`。`export`命令用于规定模块的对外接口，`import`命令用于输入其他模块提供的功能。
 
-一个模块就是一个独立的文件。该文件内部的所有变量，外部无法获取。如果你希望外部能够读取模块内部的某个变量，就必须使用`export`关键字输出该变量。下面是一个JS文件，里面使用`export`命令输出变量。
+一个模块就是一个独立的文件。该文件内部的所有变量，外部无法获取。如果你希望外部能够读取模块内部的某个变量，就必须使用`export`关键字输出该变量。下面是一个 JS 文件，里面使用`export`命令输出变量。
 
 ```javascript
 // profile.js
@@ -188,13 +176,12 @@ foo()
 
 上面代码中，`export`语句放在函数之中，结果报错。
 
-## import命令
+## import 命令
 
-使用`export`命令定义了模块的对外接口以后，其他JS文件就可以通过`import`命令加载这个模块（文件）。
+使用`export`命令定义了模块的对外接口以后，其他 JS 文件就可以通过`import`命令加载这个模块。
 
 ```javascript
 // main.js
-
 import {firstName, lastName, year} from './profile';
 
 function setName(element) {
@@ -202,13 +189,21 @@ function setName(element) {
 }
 ```
 
-上面代码的`import`命令，就用于加载`profile.js`文件，并从中输入变量。`import`命令接受一个对象（用大括号表示），里面指定要从其他模块导入的变量名。大括号里面的变量名，必须与被导入模块（`profile.js`）对外接口的名称相同。
+上面代码的`import`命令，用于加载`profile.js`文件，并从中输入变量。`import`命令接受一对大括号，里面指定要从其他模块导入的变量名。大括号里面的变量名，必须与被导入模块（`profile.js`）对外接口的名称相同。
 
-如果想为输入的变量重新取一个名字，import命令要使用`as`关键字，将输入的变量重命名。
+如果想为输入的变量重新取一个名字，`import`命令要使用`as`关键字，将输入的变量重命名。
 
 ```javascript
 import { lastName as surname } from './profile';
 ```
+
+`import`后面的`from`指定模块文件的位置，可以是相对路径，也可以是绝对路径，`.js`路径可以省略。如果只是模块名，不带有路径，那么必须有配置文件，告诉 JavaScript 引擎该模块的位置。
+
+```javascript
+import {myMethod} from 'util';
+```
+
+上面代码中，`util`是模块文件名，由于不带有路径，必须通过配置，告诉引擎怎么取到这个模块。
 
 注意，`import`命令具有提升效果，会提升到整个模块的头部，首先执行。
 
@@ -218,37 +213,54 @@ foo();
 import { foo } from 'my_module';
 ```
 
-上面的代码不会报错，因为`import`的执行早于`foo`的调用。
+上面的代码不会报错，因为`import`的执行早于`foo`的调用。这种行为的本质是，`import`命令是编译阶段执行的，在代码运行之前。
 
-如果在一个模块之中，先输入后输出同一个模块，`import`语句可以与`export`语句写在一起。
-
-```javascript
-export { es6 as default } from './someModule';
-
-// 等同于
-import { es6 } from './someModule';
-export default es6;
-```
-
-上面代码中，`export`和`import`语句可以结合在一起，写成一行。但是从可读性考虑，不建议采用这种写法，而应该采用标准写法。
-
-另外，ES7有一个[提案](https://github.com/leebyron/ecmascript-more-export-from)，简化先输入后输出的写法，拿掉输出时的大括号。
+由于`import`是静态执行，所以不能使用表达式和变量，这些只有在运行时才能得到结果的语法结构。
 
 ```javascript
-// 提案的写法
-export v from 'mod';
+// 报错
+import { 'f' + 'oo' } from 'my_module';
 
-// 现行的写法
-export {v} from 'mod';
+// 报错
+let module = 'my_module';
+import { foo } from module;
+
+// 报错
+if (x === 1) {
+  import { foo } from 'module1';
+} else {
+  import { foo } from 'module2';
+}
 ```
 
-`import`语句会执行所加载的模块，因此可以有下面的写法。
+上面三种写法都会报错，因为它们用到了表达式、变量和`if`结构。在静态分析阶段，这些语法都是没法得到值的。
+
+最后，`import`语句会执行所加载的模块，因此可以有下面的写法。
 
 ```javascript
 import 'lodash';
 ```
 
 上面代码仅仅执行`lodash`模块，但是不输入任何值。
+
+如果多次重复执行同一句`import`语句，那么只会执行一次，而不会执行多次。
+
+```javascript
+import 'lodash';
+import 'lodash';
+```
+
+上面代码加载了两次`lodash`，但是只会执行一次。
+
+```javascript
+import { foo } from 'my_module';
+import { bar } from 'my_module';
+
+// 等同于
+import { foo, bar } from 'my_module';
+```
+
+上面代码中，虽然`foo`和`bar`在两个语句中加载，但是它们对应的是同一个`my_module`实例。也就是说，`import`语句是 Singleton 模式。
 
 ## 模块的整体加载
 
@@ -288,7 +300,7 @@ console.log('圆面积：' + circle.area(4));
 console.log('圆周长：' + circle.circumference(14));
 ```
 
-## export default命令
+## export default 命令
 
 从前面的例子可以看出，使用`import`命令的时候，用户需要知道所要加载的变量名或函数名，否则无法加载。但是，用户肯定希望快速上手，未必愿意阅读文档，去了解模块有哪些属性和方法。
 
@@ -335,19 +347,19 @@ export default foo;
 下面比较一下默认输出和正常输出。
 
 ```javascript
-// 输出
-export default function crc32() {
+// 第一组
+export default function crc32() { // 输出
   // ...
 }
-// 输入
-import crc32 from 'crc32';
 
-// 输出
-export function crc32() {
+import crc32 from 'crc32'; // 输入
+
+// 第二组
+export function crc32() { // 输出
   // ...
 };
-// 输入
-import {crc32} from 'crc32';
+
+import {crc32} from 'crc32'; // 输入
 ```
 
 上面代码的两组写法，第一组是使用`export default`时，对应的`import`语句不需要使用大括号；第二组是不使用`export default`时，对应的`import`语句需要使用大括号。
@@ -387,17 +399,31 @@ export default var a = 1;
 
 上面代码中，`export default a`的含义是将变量`a`的值赋给变量`default`。所以，最后一种写法会报错。
 
-有了`export default`命令，输入模块时就非常直观了，以输入jQuery模块为例。
+有了`export default`命令，输入模块时就非常直观了，以输入 lodash 模块为例。
 
 ```javascript
-import $ from 'jquery';
+import _ from 'lodash';
 ```
 
-如果想在一条import语句中，同时输入默认方法和其他变量，可以写成下面这样。
+如果想在一条`import`语句中，同时输入默认方法和其他变量，可以写成下面这样。
 
 ```javascript
-import customName, { otherMethod } from './export-default';
+import _, { each } from 'lodash';
 ```
+
+对应上面代码的`export`语句如下。
+
+```javascript
+export default function (obj) {
+  // ···
+}
+export function each(obj, iterator, context) {
+  // ···
+}
+export { each as forEach };
+```
+
+上面代码的最后一行的意思是，暴露出`forEach`接口，默认指向`each`接口，即`forEach`和`each`指向同一个方法。
 
 如果要输出默认的值，只需将值跟在`export default`之后即可。
 
@@ -414,6 +440,62 @@ export default class { ... }
 // main.js
 import MyClass from 'MyClass';
 let o = new MyClass();
+```
+
+## export 与 import 的复合写法
+
+如果在一个模块之中，先输入后输出同一个模块，`import`语句可以与`export`语句写在一起。
+
+```javascript
+export { foo, bar } from 'my_module';
+
+// 等同于
+import { foo, bar } from 'my_module';
+export { foo, bar };
+```
+
+上面代码中，`export`和`import`语句可以结合在一起，写成一行。
+
+模块的接口改名和整体输出，也可以采用这种写法。
+
+```javascript
+// 接口改名
+export { foo as myFoo } from 'my_module';
+
+// 整体输出
+export * from 'my_module';
+```
+
+默认接口的写法如下。
+
+```javascript
+export { default } from 'foo';
+```
+
+具名接口改为默认接口的写法如下。
+
+```javascript
+export { es6 as default } from './someModule';
+
+// 等同于
+import { es6 } from './someModule';
+export default es6;
+```
+
+同样地，默认接口也可以改名为具名接口。
+
+```javascript
+export { default as es6 } from './someModule';
+```
+
+另外，ES7有一个[提案](https://github.com/leebyron/ecmascript-more-export-from)，简化先输入后输出的写法，拿掉输出时的大括号。
+
+```javascript
+// 现行的写法
+export {v} from 'mod';
+
+// 提案的写法
+export v from 'mod';
 ```
 
 ## 模块的继承
@@ -611,6 +693,24 @@ $ babel-node main.js
 ```
 
 这就证明了`x.js`和`y.js`加载的都是`C`的同一个实例。
+
+## 浏览器的模块加载
+
+浏览器使用 ES6 模块的语法如下。
+
+```html
+<script type="module" src="foo.js"></script>
+```
+
+上面代码在网页中插入一个模块`foo.js`，由于`type`属性设为`module`，所以浏览器知道这是一个 ES6 模块。
+
+浏览器对于带有`type="module"`的`<script>`，都是异步加载外部脚本，不会造成堵塞浏览器。
+
+对于外部的模块脚本（上例是`foo.js`），有几点需要注意。
+
+- 该脚本自动采用严格模块。
+- 该脚本内部的顶层变量，都只在该脚本内部有效，外部不可见。
+- 该脚本内部的顶层的`this`关键字，返回`undefined`，而不是指向`window`。
 
 ## 循环加载
 
@@ -908,7 +1008,7 @@ TypeError: even is not a function
 
 ## 跨模块常量
 
-上面说过，`const`声明的常量只在当前代码块有效。如果想设置跨模块的常量（即跨多个文件），可以采用下面的写法。
+本书介绍`const`命令的时候说过，`const`声明的常量只在当前代码块有效。如果想设置跨模块的常量（即跨多个文件），可以采用下面的写法。
 
 ```javascript
 // constants.js 模块
@@ -927,13 +1027,90 @@ console.log(A); // 1
 console.log(B); // 3
 ```
 
+如果要使用的常量非常多，可以建一个专门的`constants`目录，将各种常量写在不同的文件里面，保存在该目录下。
+
+```javascript
+// constants/db.js
+export const db = {
+  url: 'http://my.couchdbserver.local:5984',
+  admin_username: 'admin',
+  admin_password: 'admin password'
+};
+
+// constants/user.js
+export const users = ['root', 'admin', 'staff', 'ceo', 'chief', 'moderator'];
+```
+
+然后，将这些文件输出的常量，合并在`index.js`里面。
+
+```javascript
+// constants/index.js
+export {db} from './db';
+export {users} from './users';
+```
+
+使用的时候，直接加载`index.js`就可以了。
+
+```javascript
+// script.js
+import {db, users} from './constants';
+```
+
+## import()
+
+上面说过了，`import`语句会被JavaScript引擎静态分析，先于模块内的其他模块执行（叫做”连接“更合适）。所以，下面的代码会报错。
+
+```javascript
+// 报错
+if (x === 2) {
+  import MyModual from './myModual';
+}
+```
+
+上面代码中，引擎处理`import`语句是在执行之前，所以`import`语句放在`if`代码块之中毫无意义，因此会报句法错误，而不是执行时错误。
+
+这样的设计，固然有利于编译器提高效率，但也导致无法在运行时加载模块。从长远来看，`import`语句会取代 Node 的`require`方法，但是`require`是运行时加载模块，`import`语句显然无法取代这种动态加载功能。
+
+```javascript
+const path = './' + fileName;
+const myModual = require(path);
+```
+
+上面的语句就是动态加载，`require`到底加载哪一个模块，只有运行时才知道。`import`语句做不到这一点。
+
+因此，有一个[提案](https://github.com/tc39/proposal-dynamic-import)，建议引入`import()`函数，完成动态加载。
+
+```javascript
+import(specifier)
+```
+
+上面代码中，`import`函数的参数`specifier`，指定所要加载的模块的位置。`import`语句能够接受什么参数，`import()`函数就能接受什么参数，两者区别主要是后者为动态加载。
+
+`import()`返回一个 Promise 对象。下面是一个例子。
+
+```javascript
+const main = document.querySelector('main');
+
+import(`./section-modules/${someVariable}.js`)
+  .then(module => {
+    module.loadPageInto(main);
+  })
+  .catch(err => {
+    main.textContent = err.message;
+  });
+```
+
+`import()`函数可以用在任何地方，不仅仅是模块，非模块的脚本也可以使用。它是运行时执行，也就是说，什么时候运行到这一句，也会加载指定的模块。另外，`import()`函数与所加载的模块没有静态连接关系，这点也是与`import`语句不相同。
+
+`import()`类似于 Node 的`require`方法，区别主要是前者是异步加载，后者是同步加载。
+
 ## ES6模块的转码
 
 浏览器目前还不支持ES6模块，为了现在就能使用，可以将转为ES5的写法。除了Babel可以用来转码之外，还有以下两个方法，也可以用来转码。
 
 ### ES6 module transpiler
 
-[ES6 module transpiler](https://github.com/esnext/es6-module-transpiler)是square公司开源的一个转码器，可以将ES6模块转为CommonJS模块或AMD模块的写法，从而在浏览器中使用。
+[ES6 module transpiler](https://github.com/esnext/es6-module-transpiler)是 square 公司开源的一个转码器，可以将 ES6 模块转为 CommonJS 模块或 AMD 模块的写法，从而在浏览器中使用。
 
 首先，安装这个转玛器。
 
@@ -941,7 +1118,7 @@ console.log(B); // 3
 $ npm install -g es6-module-transpiler
 ```
 
-然后，使用`compile-modules convert`命令，将ES6模块文件转码。
+然后，使用`compile-modules convert`命令，将 ES6 模块文件转码。
 
 ```bash
 $ compile-modules convert file1.js file2.js
@@ -955,9 +1132,9 @@ $ compile-modules convert -o out.js file1.js
 
 ### SystemJS
 
-另一种解决方法是使用[SystemJS](https://github.com/systemjs/systemjs)。它是一个垫片库（polyfill），可以在浏览器内加载ES6模块、AMD模块和CommonJS模块，将其转为ES5格式。它在后台调用的是Google的Traceur转码器。
+另一种解决方法是使用 [SystemJS](https://github.com/systemjs/systemjs)。它是一个垫片库（polyfill），可以在浏览器内加载 ES6 模块、AMD 模块和 CommonJS 模块，将其转为 ES5 格式。它在后台调用的是 Google 的 Traceur 转码器。
 
-使用时，先在网页内载入system.js文件。
+使用时，先在网页内载入`system.js`文件。
 
 ```html
 <script src="system.js"></script>
@@ -973,7 +1150,7 @@ $ compile-modules convert -o out.js file1.js
 
 上面代码中的`./app`，指的是当前目录下的app.js文件。它可以是ES6模块文件，`System.import`会自动将其转码。
 
-需要注意的是，`System.import`使用异步加载，返回一个Promise对象，可以针对这个对象编程。下面是一个模块文件。
+需要注意的是，`System.import`使用异步加载，返回一个 Promise 对象，可以针对这个对象编程。下面是一个模块文件。
 
 ```javascript
 // app/es6-file.js:
@@ -997,4 +1174,5 @@ System.import('app/es6-file').then(function(m) {
 </script>
 ```
 
-上面代码中，`System.import`方法返回的是一个Promise对象，所以可以用then方法指定回调函数。
+上面代码中，`System.import`方法返回的是一个 Promise 对象，所以可以用`then`方法指定回调函数。
+

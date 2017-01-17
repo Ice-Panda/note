@@ -8,7 +8,11 @@
 - [ECMAScript Current Proposals](https://github.com/tc39/ecma262): ECMAScript当前的所有提案
 - [ECMAScript Active Proposals](https://github.com/tc39/proposals): 已经进入正式流程的提案
 - [ECMAscript proposals](https://github.com/hemanth/es-next)：从阶段0到阶段4的所有提案列表
+- [TC39 meeting agendas](https://github.com/tc39/agendas): TC39 委员会历年的会议记录
 - [ECMAScript Daily](https://ecmascript-daily.github.io/): TC39委员会的动态
+- [The TC39 Process](https://tc39.github.io/process-document/): 提案进入正式规格的流程
+- [TC39: A Process Sketch, Stages 0 and 1](https://thefeedbackloop.xyz/tc39-a-process-sketch-stages-0-and-1/): Stage 0 和 Stage 1 的含义
+- [TC39 Process Sketch, Stage 2](https://thefeedbackloop.xyz/tc39-process-sketch-stage-2/): Stage 2 的含义
 
 ## 综合介绍
 
@@ -126,8 +130,9 @@
 - Nicolas Bevacqua, [More ES6 Proxy Traps in Depth](http://ponyfoo.com/articles/more-es6-proxy-traps-in-depth)
 - Axel Rauschmayer, [Pitfall: not all objects can be wrapped transparently by proxies](http://www.2ality.com/2016/11/proxying-builtins.html)
 - Bertalan Miklos, [Writing a JavaScript Framework - Data Binding with ES6 Proxies](https://blog.risingstack.com/writing-a-javascript-framework-data-binding-es6-proxy/): 使用 Proxy 实现观察者模式
+- Keith Cirkel, [Metaprogramming in ES6: Part 2 - Reflect](https://www.keithcirkel.co.uk/metaprogramming-in-es6-part-2-reflect/): Reflect API 的详细介绍
 
-## Promise对象
+## Promise 对象
 
 - Jake Archibald, [JavaScript Promises: There and back again](http://www.html5rocks.com/en/tutorials/es6/promises/)
 - Tilde, [rsvp.js](https://github.com/tildeio/rsvp.js)
@@ -138,6 +143,7 @@
 - Ronald Chen, [How to escape Promise Hell](https://medium.com/@pyrolistical/how-to-get-out-of-promise-hell-8c20e0ab0513#.2an1he6vf): 如何使用`Promise.all`方法的一些很好的例子
 - Jordan Harband, [proposal-promise-try](https://github.com/ljharb/proposal-promise-try): Promise.try() 方法的提案
 - Sven Slootweg, [What is Promise.try, and why does it matter?](http://cryto.net/~joepie91/blog/2016/05/11/what-is-promise-try-and-why-does-it-matter/): Promise.try() 方法的优点
+- Yehuda Katz, [TC39: Promises, Promises](https://thefeedbackloop.xyz/tc39-promises-promises/): Promise.try() 的用处
 
 ## Iterator
 
@@ -175,6 +181,7 @@
 - Daniel Brain, [Understand promises before you start using async/await](https://medium.com/@bluepnume/learn-about-promises-before-you-start-using-async-await-eb148164a9c8): 讨论async/await与Promise的关系
 - Jake Archibald, [Async functions - making promises friendly](https://developers.google.com/web/fundamentals/getting-started/primers/async-functions)
 - Axel Rauschmayer, [ES proposal: asynchronous iteration](http://www.2ality.com/2016/10/asynchronous-iteration.html): 异步遍历器的详细介绍
+- Dima Grossman, [How to write async await without try-catch blocks in Javascript](http://blog.grossman.io/how-to-write-async-await-without-try-catch-blocks-in-javascript/): 除了 try/catch 以外的 async 函数内部捕捉错误的方法
 
 ## Class
 
@@ -232,3 +239,4 @@
 - SystemJS, [SystemJS](https://github.com/systemjs/systemjs): 在浏览器中加载AMD、CJS、ES6模块的一个垫片库
 - Modernizr, [HTML5 Cross Browser Polyfills](https://github.com/Modernizr/Modernizr/wiki/HTML5-Cross-Browser-Polyfills#ecmascript-6-harmony): ES6垫片库清单
 - Facebook, [regenerator](https://github.com/facebook/regenerator): 将Generator函数转为ES5的转码器
+

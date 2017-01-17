@@ -13,7 +13,7 @@ baz // {foo: "bar"}
 var baz = {foo: foo};
 ```
 
-上面代码表明，ES6允许在对象之中，直接写变量。这时，属性名为变量名, 属性值为变量的值。下面是另一个例子。
+上面代码表明，ES6 允许在对象之中，直接写变量。这时，属性名为变量名, 属性值为变量的值。下面是另一个例子。
 
 ```javascript
 function f(x, y) {
@@ -244,22 +244,35 @@ myObject // Object {[object Object]: "valueB"}
 函数的`name`属性，返回函数名。对象方法也是函数，因此也有`name`属性。
 
 ```javascript
-var person = {
+const person = {
   sayName() {
-    console.log(this.name);
+    console.log('hello!');
   },
-  get firstName() {
-    return "Nicholas";
-  }
 };
 
 person.sayName.name   // "sayName"
-person.firstName.name // "get firstName"
 ```
 
-上面代码中，方法的`name`属性返回函数名（即方法名）。如果使用了取值函数，则会在方法名前加上`get`。如果是存值函数，方法名的前面会加上`set`。
+上面代码中，方法的`name`属性返回函数名（即方法名）。
 
-有两种特殊情况：`bind`方法创造的函数，`name`属性返回“bound”加上原函数的名字；`Function`构造函数创造的函数，`name`属性返回“anonymous”。
+如果对象的方法使用了取值函数（`getter`）和存值函数（`setter`），则`name`属性不是在该方法上面，而是该方法的属性的描述对象的`get`和`set`属性上面，返回值是方法名前加上`get`和`set`。
+
+```javascript
+const obj = {
+  get foo() {},
+  set foo(x) {}
+};
+
+obj.foo.name
+// TypeError: Cannot read property 'name' of undefined
+
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'foo');
+
+descriptor.get.name // "get foo"
+descriptor.set.name // "set foo"
+```
+
+有两种特殊情况：`bind`方法创造的函数，`name`属性返回`bound`加上原函数的名字；`Function`构造函数创造的函数，`name`属性返回`anonymous`。
 
 ```javascript
 (new Function()).name // "anonymous"
@@ -270,7 +283,7 @@ var doSomething = function() {
 doSomething.bind().name // "bound doSomething"
 ```
 
-如果对象的方法是一个Symbol值，那么`name`属性返回的是这个Symbol值的描述。
+如果对象的方法是一个 Symbol 值，那么`name`属性返回的是这个 Symbol 值的描述。
 
 ```javascript
 const key1 = Symbol('description');
@@ -283,7 +296,7 @@ obj[key1].name // "[description]"
 obj[key2].name // ""
 ```
 
-上面代码中，`key1`对应的Symbol值有描述，`key2`没有。
+上面代码中，`key1`对应的 Symbol 值有描述，`key2`没有。
 
 ## Object.is()
 
@@ -460,7 +473,7 @@ Object.assign([1, 2, 3], [4, 5])
 // [4, 5, 3]
 ```
 
-上面代码中，`Object.assign`把数组视为属性名为0、1、2的对象，因此目标数组的0号属性`4`覆盖了原数组的0号属性`1`。
+上面代码中，`Object.assign`把数组视为属性名为0、1、2的对象，因此源数组的0号属性`4`覆盖了目标数组的0号属性`1`。
 
 ### 常见用途
 
@@ -754,19 +767,19 @@ Object.getPrototypeOf(rec) === Rectangle.prototype
 // false
 ```
 
-## Object.values()，Object.entries()
+## Object.keys()，Object.values()，Object.entries()
 
 ### Object.keys()
 
-ES5引入了`Object.keys`方法，返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名。
+ES5 引入了`Object.keys`方法，返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名。
 
 ```javascript
-var obj = { foo: "bar", baz: 42 };
+var obj = { foo: 'bar', baz: 42 };
 Object.keys(obj)
 // ["foo", "baz"]
 ```
 
-目前，ES7有一个[提案](https://github.com/tc39/proposal-object-values-entries)，引入了跟`Object.keys`配套的`Object.values`和`Object.entries`。
+ES2017 [引入](https://github.com/tc39/proposal-object-values-entries)了跟`Object.keys`配套的`Object.values`和`Object.entries`，作为遍历一个对象的补充手段。
 
 ```javascript
 let {keys, values, entries} = Object;
@@ -790,7 +803,7 @@ for (let [key, value] of entries(obj)) {
 `Object.values`方法返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值。
 
 ```javascript
-var obj = { foo: "bar", baz: 42 };
+var obj = { foo: 'bar', baz: 42 };
 Object.values(obj)
 // ["bar", 42]
 ```
@@ -812,9 +825,9 @@ var obj = Object.create({}, {p: {value: 42}});
 Object.values(obj) // []
 ```
 
-上面代码中，`Object.create`方法的第二个参数添加的对象属性（属性`p`），如果不显式声明，默认是不可遍历的。`Object.values`不会返回这个属性。
+上面代码中，`Object.create`方法的第二个参数添加的对象属性（属性`p`），如果不显式声明，默认是不可遍历的，因为`p`是继承的属性，而不是对象自身的属性。`Object.values`不会返回这个属性。
 
-`Object.values`会过滤属性名为Symbol值的属性。
+`Object.values`会过滤属性名为 Symbol 值的属性。
 
 ```javascript
 Object.values({ [Symbol()]: 123, foo: 'abc' });

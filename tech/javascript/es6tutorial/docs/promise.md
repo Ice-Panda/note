@@ -355,7 +355,7 @@ someAsyncThing().then(function() {
 
 ```javascript
 var promise = new Promise(function(resolve, reject) {
-  resolve("ok");
+  resolve('ok');
   setTimeout(function() { throw new Error('test') }, 0)
 });
 promise.then(function(value) { console.log(value) });
@@ -363,9 +363,9 @@ promise.then(function(value) { console.log(value) });
 // Uncaught Error: test
 ```
 
-上面代码中，Promise指定在下一轮“事件循环”再抛出错误，结果由于没有指定使用`try...catch`语句，就冒泡到最外层，成了未捕获的错误。因为此时，Promise的函数体已经运行结束了，所以这个错误是在Promise函数体外抛出的。
+上面代码中，Promise 指定在下一轮“事件循环”再抛出错误，结果由于没有指定使用`try...catch`语句，就冒泡到最外层，成了未捕获的错误。因为此时，Promise的函数体已经运行结束了，所以这个错误是在Promise函数体外抛出的。
 
-Node.js有一个`unhandledRejection`事件，专门监听未捕获的`reject`错误。
+Node 有一个`unhandledRejection`事件，专门监听未捕获的`reject`错误。
 
 ```javascript
 process.on('unhandledRejection', function (err, p) {
@@ -375,7 +375,7 @@ process.on('unhandledRejection', function (err, p) {
 
 上面代码中，`unhandledRejection`事件的监听函数有两个参数，第一个是错误对象，第二个是报错的Promise实例，它可以用来了解发生错误的环境信息。。
 
-需要注意的是，`catch`方法返回的还是一个Promise对象，因此后面还可以接着调用`then`方法。
+需要注意的是，`catch`方法返回的还是一个 Promise 对象，因此后面还可以接着调用`then`方法。
 
 ```javascript
 var someAsyncThing = function() {
@@ -637,20 +637,38 @@ console.log('one');
 
 ## Promise.reject()
 
-`Promise.reject(reason)`方法也会返回一个新的Promise实例，该实例的状态为`rejected`。它的参数用法与`Promise.resolve`方法完全一致。
+`Promise.reject(reason)`方法也会返回一个新的 Promise 实例，该实例的状态为`rejected`。
 
 ```javascript
 var p = Promise.reject('出错了');
 // 等同于
 var p = new Promise((resolve, reject) => reject('出错了'))
 
-p.then(null, function (s){
+p.then(null, function (s) {
   console.log(s)
 });
 // 出错了
 ```
 
 上面代码生成一个Promise对象的实例`p`，状态为`rejected`，回调函数会立即执行。
+
+注意，`Promise.reject()`方法的参数，会原封不动地作为`reject`的理由，变成后续方法的参数。这一点与`Promise.resolve`方法不一致。
+
+```javascript
+const thenable = {
+  then(resolve, reject) {
+    reject('出错了');
+  }
+};
+
+Promise.reject(thenable)
+.catch(e => {
+  console.log(e === thenable)
+})
+// true
+```
+
+上面代码中，`Promise.reject`方法的参数是一个`thenable`对象，执行以后，后面`catch`方法的参数不是`reject`抛出的“出错了”这个字符串，而是`thenable`对象。
 
 ## 两个有用的附加方法
 
@@ -770,13 +788,13 @@ run(g);
 
 ## Promise.try()
 
-实际开发中，经常遇到一种情况：不知道函数`f`是同步函数，还是异步操作，但是想用 Promise 来处理它。因为这样就可以不管`f`是否包含异步操作，都用`then`方法指定下一步流程，用`catch`方法处理`f`抛出的错误。一般就会采用下面的写法。
+实际开发中，经常遇到一种情况：不知道或者不想区分，函数`f`是同步函数还是异步操作，但是想用 Promise 来处理它。因为这样就可以不管`f`是否包含异步操作，都用`then`方法指定下一步流程，用`catch`方法处理`f`抛出的错误。一般就会采用下面的写法。
 
 ```javascript
 Promise.resolve().then(f)
 ```
 
-上面的写法有一个缺点，就是如果`f`是同步函数，那么它会在下一轮事件循环执行。
+上面的写法有一个缺点，就是如果`f`是同步函数，那么它会在本轮事件循环的末尾执行。
 
 ```javascript
 const f = () => console.log('now');
@@ -798,7 +816,7 @@ console.log('next');
 // next
 ```
 
-上面代码中，第一行是一个立即执行的匿名函数，会立即执行里面的`async`函数，因此如果`f`是同步的，就会得到同步的结果；如果`f`是异步的，就可以用`then`指定下一步，就像下面的写法。
+上面代码中，第二行是一个立即执行的匿名函数，会立即执行里面的`async`函数，因此如果`f`是同步的，就会得到同步的结果；如果`f`是异步的，就可以用`then`指定下一步，就像下面的写法。
 
 ```javascript
 (async () => f())()
@@ -847,7 +865,7 @@ console.log('next');
 function getUsername(userId) {
   return database.users.get({id: userId})
   .then(function(user) {
-    return uesr.name;
+    return user.name;
   });
 }
 ```
@@ -879,4 +897,6 @@ Promise.try(database.users.get({id: userId}))
   .then(...)
   .catch(...)
 ```
+
+事实上，`Promise.try`就是模拟`try`代码块，就像`promise.catch`模拟的是`catch`代码块。
 
