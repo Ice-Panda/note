@@ -899,6 +899,180 @@ RELEASE SAVEPOINT来删除保存的点
 
 ## MySQL分区
 
+分区值根据一定的规则，数据库把一个表分解成多个更小的更容易管理的部分。就访问数据库的应用而言，逻辑上只有一个表，或一个索引。但实际上表可能有10个物理分区对象组成，每个分区都是一个独立的对象，可以独立处理，可以作为表的一部分进行处理。分区对应用来说完全透明，不影响业务逻辑。分区的优点如下：
+- 与单个磁盘或文件系统相比，可以存储更多数据
+- 优化查询。在where子句中包含分区条件，可以只扫描必要的一个或多个分区来提高查询效率；同时在设计sum()和count()这类聚合函数时，可以容易地在每个分区上并行处理，最终只需要汇总所有分区得到的结果
+- 对于过期或者不需要保存的数据，可以通过删除分区快速删除
+- 夸多个磁盘来分散数据查询，可以获得更大的查询吞吐量
+
+### 分区概述
+分区有利于管理大的表，分区键根据某个区间值（或者值范围）、特定值列表或者hash函数执行数据的聚集，让数据规则分布在不同的分区中，让一个大对象变成一些小对象。
+
+### 分区类型
+- range：基于一个给定连续区间范围，把数据分配到不同的分区
+- list：类似rang分区，区别在于list基于枚举的值列表分区，range基于给定范围
+- hash：基于给定的分区个数，把数据分配到不同的分区
+- key：类似于hash分区
+
+无论哪种分区类型，要么分区表上没有主键//唯一键，要么分区表的主键/唯一键都必须包含分区键，也就是说不能使用主键/唯一键字段之外的其他字段分区。
+
+### range分区
+
+区间要连续且不可重复
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by range(store_id)(
+    partition p0 values less than (10),
+    partition p1 values less than (20),
+    partition p2 values less than (30),
+    )
+```
+如果store_id大于30那么数据插入就会失败，可以设置`values less than maxvalue`来设置最大值`alter table emp add partition (partition p3 values less than maxvalue)`
+
+mysql还支持使用表达式
+
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by range(year(hired))(
+    partition p0 values less than (1995),
+    partition p1 values less than (2000),
+    partition p2 values less than (2005),
+    )
+```
+
+还支持使用range column支持非整数分区，这样创建日期分区就不需要通过函数了
+
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by range columns (separated)(
+    partition p0 values less than ('1996-01-01'),
+    partition p1 values less than ('2001-01-01'),
+    partition p2 values less than ('2005-01-01'),
+    )
+```
+
+range分区功能特别适合以下两种情况：
+- 当需要删除国企的数据时，只需要简答的`alter table emp drop partition p0`
+- 经常运行分区键的查询，mysql可以很快的确定只有某一个区或者某些去需要扫描，因为其他分区不可能包含符合where条件的任何记录
+
+### list分区
+
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by list(id)(
+    partition p0 values in (3,5),
+    partition p1 values in (1,10),
+    partition p2 values in (2),
+    partition p3 values in (6),
+    )
+```
+如果视图插入的列值不在分区中会失败
+
+### columns分区
+分为range columns和list columns。支持整数，日期，字符串三大数据类型
+
+```
+create table r3(
+    a int,
+    b int
+    )
+partition by range columns(a,b)(
+    partition p0 values less than (0,10),
+    partition p1 values less than (10,30),
+    partition p2 values less than (20,60),
+    partition p3 values less than (30,maxvalue),
+    partition p3 values less than (maxvalue,maxvalue),
+    )
+```
+
+### hash分区
+对一个执行hash分区时，MySQL会对分区键应用一个散列函数，以确定数据应当放在N个分区中的哪个分区
+
+mysql支持两种分区，常规hash分区和线性hash分区。常规hash使用取模算法，线性使用一个线性的2的幂的运算法则
+
+创建一个常规hash分区使用partition by hash(expr) partition num对分区类型、分区键和分区个数进行定义
+
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by hash(store_id) partions 4;
+```
+如果要保存的记录的分区编号为N，那么N=MOD(expr,num)
+
+常规分区方法，增加分区代价太高
+
+**线性分区** `LINEAR`关键字
+
+
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by hash(store_id) partions 4;
+```
+有点，增加、删除、合并、拆分分区更加迅速，但是分区之间的数据分布不太均衡
+
+### key分区
+类似于hash，支持除了blob和text之外的所有其他类型作为分区键
+
+```
+create table emp
+(
+    id int not null,
+    hired date not null default '1970-01-01',
+    separated date not null default '1970-01-01',
+    job varchar(30) not null,
+    store_id int not null
+)
+partition by key (job) partions 4;
+```
+如果没有指定列，key会默认以主键作为分区键，没有主键则选择非空唯一键，都没有的话就不能分区。分布算法与hash  LINEAR 一致
+
+### 子分区
+
+### 分区管理
+分区管理都是通过alter table来完成
+
+
 
 
 # 优化篇
