@@ -272,9 +272,13 @@ set类型可以一次选取多个成员，enum只能选一个 `insert into t2 va
 - like 通配符匹配
 
 - regexp或rlike 正则表达式匹配
+
 - NOT 或者 ! 逻辑非
+
 - AND 或者 && 逻辑与
+
 - OR 或者 || 逻辑或
+
 - XOR 逻辑异或
 - & 位与
 - | 位或
@@ -895,6 +899,8 @@ RELEASE SAVEPOINT来删除保存的点
 
 ## MySQL分区
 
+
+
 # 优化篇
 
 ## SQL优化
@@ -974,6 +980,7 @@ desc select * from t2;
 - key_len：使用到索引字段的长度
 
 - rows：扫描行的数量
+
 - extra：执行情况的说明和描述，包含不适合在其他列中显示但是对执行计划非常重要的额外信息
 
 **explain extended** 可以查看SQL被执行之前优化器做了哪些SQL改写
@@ -1348,6 +1355,189 @@ mysql锁机制比较简单，MyISAM和MEMORY采用表级锁，BDB采用页面锁
 
 ### MYISAM表锁
 
+#### 查询表级锁竞争情况
+
+```
+mysql> show status like 'table%';
++----------------------------+-------+
+| Variable_name              | Value |
++----------------------------+-------+
+| Table_locks_immediate      | 111   |
+| Table_locks_waited         | 0     |
+| Table_open_cache_hits      | 0     |
+| Table_open_cache_misses    | 0     |
+| Table_open_cache_overflows | 0     |
++----------------------------+-------+
+```
+
+Table_locks_waited比较高，说明存在严重表级锁竞争问题
+
+#### MySQL表级锁的所模式
+
+MySQL表级锁有两种模式：表共享读锁和表独占写锁。
+
+对MyISAM表读操作，不会阻塞其他用户对表的读操作，但会阻塞统一表的写操作。对MyISAM表的写操作，会阻塞其他用户对表的读写操作。
+
+```
+lock table file_text write;//获得表的写锁定。当前session对表的查询，更新，插入都可进行，其他session都会被阻塞
+unlock tables;释放锁，其他session可以访问
+```
+
+#### 如何获得表锁
+
+MyISAM在执行查询语句前，会自动给涉及的表加读锁。在执行update，delete，insert前，会自动加写锁。不需要用户干预。用户一般需要直接使用lock table给MyISAM显示加锁。
+
+显示加锁，一般是为了在一定程度模拟事务操作，实现某一时间点多个表的一致性读取
+
+```
+lock tables orders read local,order_detail read local;
+select sum(total) from orders;
+select sum(subtotal) from order_detail;
+unlock tables;
+```
+
+- local表示在满足MyISAM表并发插入条件的情况下，允许其他用户在表位并发插入记录
+- 显示加锁时，必须取得所有涉及到的表的锁，否则无法访问其他表。
+
+如果sql中用到了表的别名，那么表达别名也要锁定
+
+```
+lock tables test as t read,test2 as t2 read;
+select * from test t,test2 t2 where ...
+```
+
+#### 并发插入
+
+MyISAM表的读写是串行，所以，在一定条件下MyISAM表支持查询和插入操作的并发进行
+
+MyISAM的一个系统变量concurrent_insert
+
+- 0 不允许插入
+- 1 当表的中间没有被删除的行，允许一个进行读表的同时，在表位插入。这是默认设置
+- 2 无论表中间有没有被删除的行，都允许插入
+
+#### MyISAM的锁调度
+
+当一个进程请求MyISAM的读锁，另一个请求写锁时，mysql会先批准写锁。这就是为什么MyISAM不合适大量更新和查询操作的原因。<br>
+通过设置一些系统变量可以调节这一行为
+
+- 指定启动参数low-priority-updates。MyISAM给予读请求优先的权限
+- 设置 set low-priority-updates=1 使得当前连接的更新请求优先级降低
+- 指定insert，update，delete语句的LOW_PRIORITY属性，来降低优先级
+
+上面三种方法要么读优先，要么优先。很容易造成读锁等待严重的问题。可以设置max_write_lock_count，当表的读锁达到这个值后，MySQL就暂时将写的请求优先级降低，给读进程一些获得锁的机会
+
+尽量减少查询的时间。否则会是的写进程"饿死"，不要总想着用一条select语句来解决问题，每一步查询都能在短时间内完成，从而减少锁冲突。
+
+### InnoDB锁问题
+
+#### 背景知识
+
+##### 事务及其ACID属性
+事务有一组sql鱼鱼组成，4个属性：原子性、一致性、隔离性、持久性
+
+##### 并发事务处理带来的问题
+更新丢失、脏读、不可重复、换读
+
+
+##### 事务隔离级别
+数据库实现隔离方式：
+- 在读取数据前，对其加锁，组织其他事物对数据进行修改
+- 不加任何锁，通过一定机制生成一个数据请求时间点的一致性数据快照，并用这个快照来提供一定级别的一致性读取，从用户角度来看，数据库可以提供统一数据的多个版本，这个技术也叫 **数据多版本并发控制**，也经常称为 **多版本数据库**
+
+事务隔离越严格，并发度越小，因为他们一定程度上变成了串行化进行。不同应用对事务的隔离需求不同。
+
+#### InnoDB行锁竞争情况
+```
+mysql> show status like 'innodb_row_lock%';
++-------------------------------+-------+
+| Variable_name                 | Value |
++-------------------------------+-------+
+| Innodb_row_lock_current_waits | 0     |
+| Innodb_row_lock_time          | 0     |
+| Innodb_row_lock_time_avg      | 0     |
+| Innodb_row_lock_time_max      | 0     |
+| Innodb_row_lock_waits         | 0     |
++-------------------------------+-------+
+```
+Innodb_row_lock_waits和Innodb_row_lock_time_avg比较高说明锁竞争严重。
+
+#### InnoDB的行锁模式及加锁方法
+
+InnoDB实现了两种类型的行锁：
+- 共享锁（S）：允许一个事务去读一行，阻止其他事务获得相同数据集的排它锁
+- 排它锁（X）：允许获得排他锁的事务更新数据，阻止其他事务取得相同数据集的共享读锁和排他写锁
+
+另外，为了允许行锁和表锁的共存，实现多粒度锁机制，InnoDB还有两种内部使用的意向锁，这两种意向锁都是表锁
+
+- 意向共享锁（IS）：事务打算给数据行加行共享锁，事务在给一个数据行加共享锁之前必须获得该标的IS锁
+- 意向排它锁（IX）：事务打算给数据行加行排它锁，事务在给一个数据行加行排它锁之前必须先取得该表的IX锁
+
+意向锁是自动加的，不需要用户干预。对于update、delete、insert语句，InnoDB会自动给涉及的数据集加排它锁；对于select有InnoDB不会加任何锁。
+
+事务可以通过以下语句显示给记录集加共享锁或排它锁
+- 共享锁：select * from table_name where ... lock in share mode;
+- 排它锁：select * from table_name where ... for update;
+
+select ... in share mode 加锁后再更新记录，以及
+![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.17 PM.png)
+![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.28 PM.png)
+当session1使用share mode之后session2也使用share mode。
+
+此时session1企图更新数据，就必须要等待session2的锁释放
+
+当session1等待session2释放锁时，session2也企图更新数据，他就要等待session1释放锁，从而造成死锁，这样session2就报错，session退出了事务，锁自动释放掉，从而session1获得锁，更新数据成功
+
+select ... for update 加锁。
+![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.49 PM.png)
+![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.56 PM.png)
+
+当session1获得排他锁时，session2的更新记录需要等待session1锁释放。
+
+当session1完成时，释放锁，session2获得锁，更新成功
+
+#### InnoDB行锁实现方式
+
+InnoDB行锁通过索引上的索引项加锁来实现，如果没有索引，InnoDB将通过隐藏的聚簇索引来对记录加锁。InnoDB行锁分为3种情形：
+- record lock：对索引项加锁
+- gap lock：对索引项之间的间隙、第一条记录前的间隙或最后一条记录后的间隙加锁
+- next-key lock：前两种组合，对记录及前面的间隙加锁
+
+InnoDB的这种行锁实现特点意味着：如果不通过索引条件来检索数据，那么InnoDB将其表中的所有记录加锁，效果跟表锁一样。如果不注意会导致大量锁冲突。
+
+**mysql使用索引进行加锁，虽然访问的是不同的记录，但是如果索引键相同，是会发生锁冲突的**
+
+**当表有多个索引的时候，不同事务可以使用不同的索引锁定不同的行**
+
+**即使使用了索引字段，mysql也不一定是使用索引查询，如果mysql没有使用索引查询，进行了全表查询，那么还是会进行全表锁定**
+
+#### next-key锁
+当我们用范围条件而不是相等条件检索数据，并请求锁时，InnoDB会给符合条件的已有数据记录的索引项加锁；对于键值在条件范围内但不存在的记录，叫做'间隙'，InnoDB也会对这个'间隙'加锁
+
+例如：emp有101条记录，empid：1~101，`select * from epm where empid> 100 for update`
+
+上面是一个条件检索，InnoDB不仅对符合条件的记录加锁还会对empid大于101(这些记录并不存在)的记录加锁，从而防止换读
+
+**这种锁机制，会导致严重的锁等待，所以应该优化业务逻辑，尽量使用相等条件来更新数据。**
+
+**如果使用相等条件但是请求不存在的记录，InnoDB也会使用这种锁**
+
+#### 什么时候使用表锁
+- 事务需要更新大部分或全部数据，表又比较大
+- 事务设计多个表，比较复杂，很可能引起死锁，造成大量事务的回滚
+
+#### 关于死锁
+
+大部分死锁，数据库可以检测出阿里，但是涉及外部锁或涉及表锁的情况下，InnoDB并能完全自动检测出来。这需要通过设置超时参数innodb_lock_wait_timeout来解决。它不仅用来解决死锁问题，当并发访问较高时，如果大量事务无法获得锁而自动挂起，会占用大量计算机资源，造成严重性能问题
+
+一般来说，死锁都是应用设计的问题，通过优化应用可以避免死锁
+- 如果两个session访问两个表的顺序不同，发生的死锁机会就会非常高，如果按照相同的顺序来访问，死锁就可以避免
+- 在程序以批量方式处理数据的时候，如果实现对数据排序，保证每个线程按照固定的顺序来处理记录，可以大大降低死锁的可能
+- 在事务中，如果更新记录，应该直接申请足够级别的锁，级排它锁，二不应该先申请共享锁
+
+
+如果出现死锁，可以通过show InnoDB status 来确定最后一个死锁产生的原因
+
 ## 优化SQL Server
 
 ### mysql体系结构
@@ -1409,6 +1599,17 @@ cold_cache.key_buffer_size=1G
 
 **调整"中点插入策略"**
 
+默认mysql是用LRU（least recently used）策略来选择要淘汰的索引数数据库。这样容易导致真正的热块被淘汰。中间点插入策略对LRU的优化，他将LRU练分成两部分：hot子表和warm子表，当一个索引块读入内存时，先放到LRU链表的重点，即warm子表的尾部，当达到一定的命中次数后，该索引块会被晋升到hot子表的尾部；伺候该数据块在hot子表流转，如果其到达hot子表的头部并超过一定时间，它将由hot子表的头部降级到warm子表的头部；当需要淘汰索引块时，缓存管理程序会选择有限淘汰warm表头的内存块。
+
+可以通过调节key_cache_division_limit来控制多大比例的缓存用作warm子表，默认是100，表示不适用中间点插入策略。例如30%缓存用来做cache最热的索引块，设置如下
+
+```
+set global key_cache_division_limit=70
+set global hot_cache.key_cache_division_limit=70
+```
+
+还可以通过key_cache_age_threshold控制数据块由hot子表向warm子表降级的时间，时间越小，数据亏啊降级越快。。
+
 **调整read_buffer_size和read_rnd_buffer_size**
 
 对于MyISAM表，带有order by的sql，适当增大read_rnd_buffer_size可以提高性能，read_buffer_size也是session独占，不能设置太大
@@ -1416,3 +1617,206 @@ cold_cache.key_buffer_size=1G
 #### InnoDB内存优化
 
 ##### InnoDB缓存机制
+
+InnoDB用一块内存区做IO缓存池，该缓存池不仅用来缓存InnoDB的索引块，还用来缓存InnoDB的数据块，这与MyISAM不用。 LRU由 young sublist和old sublist组成，类似于MyISAM的LRU
+
+##### innodb_buffer_pool_size
+
+innodb_buffer_pool_size决定Innodb表数据和索引数据的最大缓存区大小。值越呆，缓存命中率越高，访问InnoDB表需要的磁盘IO越少，性能越高
+
+##### old sublist
+
+LRU list，old sublist比例有系统参数innodb_old_blocks_pct。默认37，取值5~95
+
+##### innodb_old_blocks_time
+
+决定old sublist想young list转移的快慢
+
+##### 控制innodb buffer刷新，延长数据缓存时间，减缓磁盘IO
+
+### InnoDB log机制及优
+
+。。。。。
+
+### MySQL并发参数
+
+mysql本身是一个多线程结构，包括后台线程和服务线程。主要参数：max_connections,back_log,thread_cache_size,table_open_size。
+
+**max_connections**
+
+如果connections_erros_max_connections不是0，且在增长，那么说明数据库连接数已达到最大，默认值为151。mysql支持的最大线程数，取决于多种因素，包括，操作系统拍；平台的线程库的质量，内存大小，每个连接的符合以及期望的响应时间，linux先一般500~1000没有问题，如果内存足够，不考虑响应时间，甚至达到上万个连接。
+
+每个session操作都会带来文件描述符，数据库本身也要占用文件描述符，所以增大max_connections时还要考虑open-files-limit设置
+
+**back_Log**
+
+back_Log参数控制mysql监听tcp端口时设置的挤压请求栈大小，默认50，但是不能超过900。 如果数据库在较短时间内处理大量请求，可以适当增大back_log
+
+**table_open_cache**
+
+每一个sql执行线程至少要打开一个表缓存，table_open_cache=max_connections*N（每个连接执行关联查询涉及表的最大个数N）
+
+**thread_cache_size**
+
+mysql会缓存一定数量的客户服务线程以备重用，thread_cache_size控制缓存客户服务线程的数量
+
+## 磁盘IO问题
+
+....
+
+## 应用优化
+
+### 使用连接池
+
+对于访问数据库来说，建立连接的代价比较昂贵，因此有必要建立连接池。把连接当做对象或者设备放到连接池。从池中获取连接来使用，池中的连接都是已经创建好的，可以直接分配给应用使用。从而减少建立连接锁耗费的资源
+
+### 减少对MySQL的访问
+
+#### 避免对统一数据做重复检索
+
+#### 使用查询缓存
+
+存储select查询的文本及相应结果。如果随后收到一个相同的查询，服务器会从查询缓存中重新得到结果。
+
+#### 应用端增加cache层
+
+#### 负载均衡
+
+# 管理维护
+
+## MySQL中常用工具
+
+### mysqlbinlog
+
+mysql日志是二进制格式 查看日志使用mysqlbinlog。`mysqlbinlog [option] log-file1 log-gile2`
+
+- -d,--database=name
+- -o,--offset=# 忽略掉日志中前n行
+- -r,--result-file=name将输出的文本保存到制定文件
+- -s,--short-form显示简单格式，省略掉一些信息
+- --set-charset=char-name
+- --start-datetime=name-stop-datetime=name：制定日期间隔内的所有日志
+- --start-position=#,--stop-position=#；制定位置间隔内的体制
+
+## MySQL日志
+
+### 错误日志
+
+--log-error[=file_name]。mysql启动，运行，停止中遇到任何严重错误信息都会在错误日志里。如果没有给定file_name。mysql以host_name.err命名
+
+### 二进制日志
+
+--log-bin[=file_name] ，二进制格式为3种：statement,row,mixed，可以在启动时使用--binlog_formart进行设置
+
+#### statement
+
+日志中记录的都是语句，每一条对数据修改的sql语句都会记录在日志中，通过mysqlbinlog查看。**主从复制时**，从库会将日志解析为原文本，并在从库重新执行一次。这种格式的优点是：日志记录清晰易读、日志量少、对IO影响小。缺点是从库有时候复制会出错
+
+#### row
+
+记录每一行的变更记录。如果一个表进行了全表更新，那么会记录大量日志。优点：记录每一行的数据变化细节。缺点：日志量大大增加，IO影响大
+
+#### mixed
+
+混合了statement和row。默认采用statement，特殊情况采用row
+
+### 查询日志
+
+查询日志记录了客户端所有的语句，而二进制日志不包含只插叙数据的语句
+
+#### 日志的位置及格式
+
+查询日志和慢查询日志都可以保存在文件或者表中，使用log-output[=value]，value可以是table，file，none的一个或多个组合，分别表示保存在表，文件，不保存。表指的是mysql的general_log，慢查询日志在slow_log表。
+
+要启用查询日志，通过--general_log[={0|1}]和--general_log_file=file来进行控制
+
+#### 日志的读取
+
+这里的日志是村文本，可以直接尽心读取
+
+### 慢查询日志
+
+慢查询记录了所有执行时间超过long_query_time（单位：秒）的值并且扫描记录数不小于min_examined_row_limit的所有sql语句的日志。long_query_time默认为10。 慢查询日志是村文本可以直接读取
+
+## 备份与恢复
+
+mysql备份分为逻备份和物理备份
+
+## MySQL权限与安全
+
+### MySQL权限管理
+
+#### 权限系统工作原理
+
+mysql权限系统通过两段认证：
+
+1. 对连接用户进行身份认证
+2. 对认证合法的用户赋予相应的权限，用户可以在权限范围内对数据库相应操作
+
+对于身份认证，mysql通过ip和用户名进行确认。同一个用户名，但是来自不同ip，将被视为不同用户
+
+权限表在启动时就装载在内存中。
+
+#### 权限表的存取
+
+mysql数据库中的user,host,db这3个重要的权限表
+
+![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 2.19.16 PM.png)
+
+#### 账号管理
+
+##### 创建
+
+grant
+
+##### 查看权限
+
+`show grants for user@host;`
+
+##### 更改账号权限
+
+grant，revoke
+
+##### 修改账号密码
+
+**mysqladmin -u user_name -h host_name password 'newpwd'**
+
+**set password for user@host = password('newpwd')**
+
+**set password=password('new_pwd')**
+
+**grant ... identified by 'new_pwd'**
+
+**insert into user (host,user,password) values ('%','user',password('pwd'))**
+
+##### 删除账号
+
+`drop user`，`delete from user where user='user'`
+
+## MySQL监控
+
+## MySQL常见问题及应用技巧
+
+# 架构篇
+
+## 复制
+
+statement、row、mixed
+
+### 复制的3中常见架构
+
+#### 一主多从
+
+主数据库读取压力非常大时可以通过一主多从实现读写分离，把大量对实时性要求不是特别高的请求通过负载均衡分不到多个从库上
+
+#### 多级复制
+
+一主多从的架构，会在从库数量变多时，主库的IO和网络亚阿里变大，因为主库是通过推送binlog给从库。
+
+主库master1，只推送给master2，master2再推送给其他的从库，缺点时延时较高
+
+#### 双主
+
+master1，master2互为主从，master1入则读写，master2负责读。应用选择其中一作为读
+
+### 复制搭建过程
