@@ -280,6 +280,7 @@ set类型可以一次选取多个成员，enum只能选一个 `insert into t2 va
 - OR 或者 || 逻辑或
 
 - XOR 逻辑异或
+
 - & 位与
 - | 位或
 - ^ 位异或
@@ -900,15 +901,18 @@ RELEASE SAVEPOINT来删除保存的点
 ## MySQL分区
 
 分区值根据一定的规则，数据库把一个表分解成多个更小的更容易管理的部分。就访问数据库的应用而言，逻辑上只有一个表，或一个索引。但实际上表可能有10个物理分区对象组成，每个分区都是一个独立的对象，可以独立处理，可以作为表的一部分进行处理。分区对应用来说完全透明，不影响业务逻辑。分区的优点如下：
+
 - 与单个磁盘或文件系统相比，可以存储更多数据
 - 优化查询。在where子句中包含分区条件，可以只扫描必要的一个或多个分区来提高查询效率；同时在设计sum()和count()这类聚合函数时，可以容易地在每个分区上并行处理，最终只需要汇总所有分区得到的结果
 - 对于过期或者不需要保存的数据，可以通过删除分区快速删除
 - 夸多个磁盘来分散数据查询，可以获得更大的查询吞吐量
 
 ### 分区概述
+
 分区有利于管理大的表，分区键根据某个区间值（或者值范围）、特定值列表或者hash函数执行数据的聚集，让数据规则分布在不同的分区中，让一个大对象变成一些小对象。
 
 ### 分区类型
+
 - range：基于一个给定连续区间范围，把数据分配到不同的分区
 - list：类似rang分区，区别在于list基于枚举的值列表分区，range基于给定范围
 - hash：基于给定的分区个数，把数据分配到不同的分区
@@ -919,6 +923,7 @@ RELEASE SAVEPOINT来删除保存的点
 ### range分区
 
 区间要连续且不可重复
+
 ```
 create table emp
 (
@@ -934,6 +939,7 @@ partition by range(store_id)(
     partition p2 values less than (30),
     )
 ```
+
 如果store_id大于30那么数据插入就会失败，可以设置`values less than maxvalue`来设置最大值`alter table emp add partition (partition p3 values less than maxvalue)`
 
 mysql还支持使用表达式
@@ -973,6 +979,7 @@ partition by range columns (separated)(
 ```
 
 range分区功能特别适合以下两种情况：
+
 - 当需要删除国企的数据时，只需要简答的`alter table emp drop partition p0`
 - 经常运行分区键的查询，mysql可以很快的确定只有某一个区或者某些去需要扫描，因为其他分区不可能包含符合where条件的任何记录
 
@@ -994,9 +1001,11 @@ partition by list(id)(
     partition p3 values in (6),
     )
 ```
+
 如果视图插入的列值不在分区中会失败
 
 ### columns分区
+
 分为range columns和list columns。支持整数，日期，字符串三大数据类型
 
 ```
@@ -1014,6 +1023,7 @@ partition by range columns(a,b)(
 ```
 
 ### hash分区
+
 对一个执行hash分区时，MySQL会对分区键应用一个散列函数，以确定数据应当放在N个分区中的哪个分区
 
 mysql支持两种分区，常规hash分区和线性hash分区。常规hash使用取模算法，线性使用一个线性的2的幂的运算法则
@@ -1031,12 +1041,12 @@ create table emp
 )
 partition by hash(store_id) partions 4;
 ```
+
 如果要保存的记录的分区编号为N，那么N=MOD(expr,num)
 
 常规分区方法，增加分区代价太高
 
 **线性分区** `LINEAR`关键字
-
 
 ```
 create table emp
@@ -1049,9 +1059,11 @@ create table emp
 )
 partition by hash(store_id) partions 4;
 ```
+
 有点，增加、删除、合并、拆分分区更加迅速，但是分区之间的数据分布不太均衡
 
 ### key分区
+
 类似于hash，支持除了blob和text之外的所有其他类型作为分区键
 
 ```
@@ -1065,15 +1077,14 @@ create table emp
 )
 partition by key (job) partions 4;
 ```
-如果没有指定列，key会默认以主键作为分区键，没有主键则选择非空唯一键，都没有的话就不能分区。分布算法与hash  LINEAR 一致
+
+如果没有指定列，key会默认以主键作为分区键，没有主键则选择非空唯一键，都没有的话就不能分区。分布算法与hash LINEAR 一致
 
 ### 子分区
 
 ### 分区管理
+
 分区管理都是通过alter table来完成
-
-
-
 
 # 优化篇
 
@@ -1608,20 +1619,24 @@ MyISAM的一个系统变量concurrent_insert
 #### 背景知识
 
 ##### 事务及其ACID属性
+
 事务有一组sql鱼鱼组成，4个属性：原子性、一致性、隔离性、持久性
 
 ##### 并发事务处理带来的问题
+
 更新丢失、脏读、不可重复、换读
 
-
 ##### 事务隔离级别
+
 数据库实现隔离方式：
+
 - 在读取数据前，对其加锁，组织其他事物对数据进行修改
 - 不加任何锁，通过一定机制生成一个数据请求时间点的一致性数据快照，并用这个快照来提供一定级别的一致性读取，从用户角度来看，数据库可以提供统一数据的多个版本，这个技术也叫 **数据多版本并发控制**，也经常称为 **多版本数据库**
 
 事务隔离越严格，并发度越小，因为他们一定程度上变成了串行化进行。不同应用对事务的隔离需求不同。
 
 #### InnoDB行锁竞争情况
+
 ```
 mysql> show status like 'innodb_row_lock%';
 +-------------------------------+-------+
@@ -1634,11 +1649,13 @@ mysql> show status like 'innodb_row_lock%';
 | Innodb_row_lock_waits         | 0     |
 +-------------------------------+-------+
 ```
+
 Innodb_row_lock_waits和Innodb_row_lock_time_avg比较高说明锁竞争严重。
 
 #### InnoDB的行锁模式及加锁方法
 
 InnoDB实现了两种类型的行锁：
+
 - 共享锁（S）：允许一个事务去读一行，阻止其他事务获得相同数据集的排它锁
 - 排它锁（X）：允许获得排他锁的事务更新数据，阻止其他事务取得相同数据集的共享读锁和排他写锁
 
@@ -1650,21 +1667,17 @@ InnoDB实现了两种类型的行锁：
 意向锁是自动加的，不需要用户干预。对于update、delete、insert语句，InnoDB会自动给涉及的数据集加排它锁；对于select有InnoDB不会加任何锁。
 
 事务可以通过以下语句显示给记录集加共享锁或排它锁
+
 - 共享锁：select * from table_name where ... lock in share mode;
 - 排它锁：select * from table_name where ... for update;
 
-select ... in share mode 加锁后再更新记录，以及
-![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.17 PM.png)
-![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.28 PM.png)
-当session1使用share mode之后session2也使用share mode。
+select ... in share mode 加锁后再更新记录，以及 ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.17 PM.png) ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.28 PM.png) 当session1使用share mode之后session2也使用share mode。
 
 此时session1企图更新数据，就必须要等待session2的锁释放
 
 当session1等待session2释放锁时，session2也企图更新数据，他就要等待session1释放锁，从而造成死锁，这样session2就报错，session退出了事务，锁自动释放掉，从而session1获得锁，更新数据成功
 
-select ... for update 加锁。
-![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.49 PM.png)
-![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.56 PM.png)
+select ... for update 加锁。 ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.49 PM.png) ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.56 PM.png)
 
 当session1获得排他锁时，session2的更新记录需要等待session1锁释放。
 
@@ -1673,6 +1686,7 @@ select ... for update 加锁。
 #### InnoDB行锁实现方式
 
 InnoDB行锁通过索引上的索引项加锁来实现，如果没有索引，InnoDB将通过隐藏的聚簇索引来对记录加锁。InnoDB行锁分为3种情形：
+
 - record lock：对索引项加锁
 - gap lock：对索引项之间的间隙、第一条记录前的间隙或最后一条记录后的间隙加锁
 - next-key lock：前两种组合，对记录及前面的间隙加锁
@@ -1686,6 +1700,7 @@ InnoDB的这种行锁实现特点意味着：如果不通过索引条件来检�
 **即使使用了索引字段，mysql也不一定是使用索引查询，如果mysql没有使用索引查询，进行了全表查询，那么还是会进行全表锁定**
 
 #### next-key锁
+
 当我们用范围条件而不是相等条件检索数据，并请求锁时，InnoDB会给符合条件的已有数据记录的索引项加锁；对于键值在条件范围内但不存在的记录，叫做'间隙'，InnoDB也会对这个'间隙'加锁
 
 例如：emp有101条记录，empid：1~101，`select * from epm where empid> 100 for update`
@@ -1697,6 +1712,7 @@ InnoDB的这种行锁实现特点意味着：如果不通过索引条件来检�
 **如果使用相等条件但是请求不存在的记录，InnoDB也会使用这种锁**
 
 #### 什么时候使用表锁
+
 - 事务需要更新大部分或全部数据，表又比较大
 - 事务设计多个表，比较复杂，很可能引起死锁，造成大量事务的回滚
 
@@ -1705,10 +1721,10 @@ InnoDB的这种行锁实现特点意味着：如果不通过索引条件来检�
 大部分死锁，数据库可以检测出阿里，但是涉及外部锁或涉及表锁的情况下，InnoDB并能完全自动检测出来。这需要通过设置超时参数innodb_lock_wait_timeout来解决。它不仅用来解决死锁问题，当并发访问较高时，如果大量事务无法获得锁而自动挂起，会占用大量计算机资源，造成严重性能问题
 
 一般来说，死锁都是应用设计的问题，通过优化应用可以避免死锁
+
 - 如果两个session访问两个表的顺序不同，发生的死锁机会就会非常高，如果按照相同的顺序来访问，死锁就可以避免
 - 在程序以批量方式处理数据的时候，如果实现对数据排序，保证每个线程按照固定的顺序来处理记录，可以大大降低死锁的可能
 - 在事务中，如果更新记录，应该直接申请足够级别的锁，级排它锁，二不应该先申请共享锁
-
 
 如果出现死锁，可以通过show InnoDB status 来确定最后一个死锁产生的原因
 
