@@ -193,8 +193,8 @@ string
 **赋值与取值**
 
 ```
-SET key value
-GET key
+SET name value
+GET name
 
 例如
 
@@ -213,7 +213,7 @@ GET key
 **递增数字**
 
 ```
-INCR key
+INCR name
 
 127.0.0.1:6379> INCR num
 (integer) 1
@@ -230,7 +230,7 @@ OK
 (error) ERR value is not an integer or out of range
 ```
 
-####  3.2.4命令拾遗
+#### 3.2.4命令拾遗
 
 **增加指定的整数**
 
@@ -247,7 +247,7 @@ OK
 **减少指定的整数**
 
 ```
-DECRBY key
+DECRBY name
 127.0.0.1:6379> DECRBY num 15
 (integer) 10
 ```
@@ -265,7 +265,7 @@ DECRBY key
 **向尾部追加值**
 
 ```
-APPEND key value
+APPEND name value
 如果键不存在,则相当于set key value
 
 127.0.0.1:6379> APPEND num '12'
@@ -284,15 +284,15 @@ APPEND key value
 **获取字符串长度**
 
 ```
-STRLEN key
+STRLEN name
 ```
 
 **同时获取/设置多个键值**
 
 ```
-MGET key [key ...]
+MGET name [name ...]
 
-MSET key value [key value]
+MSET name value [name value]
 
 127.0.0.1:6379> MSET num 1 num2 2
 OK
@@ -309,11 +309,12 @@ OK
 **位操作**
 
 ```
-GETBIT key offset
-SETBIT key offset value
-BITCOUNT key [start] [end]
-BITOP operation destkey key [key ...]
+GETBIT name offset
+SETBIT name offset value
+BITCOUNT name [start] [end]
+BITOP operation destkey name [name ...]
 ```
+
 一个字节有8个二进制位组成.
 
 GETBIT 可以获得一个字符串类型键指定位置的二进制位的值(0或1),索引从0开始.如果二进制位索引超出范围则默认值是0
@@ -353,6 +354,176 @@ OK
 
 ### 3.3 散列类型
 
+散列类型也是一种字典结构{key:value...},key只能是字符串,一个散列类型可以包含2**32-1个key
+
+#### 3.3.2 命令
+
+**赋值与取值**
+
+```
+HSET name key value
+HGET name key
+HMSET name key value [key value...]
+HMGET name key [key...]
+HGETALL name
+```
+
+HSET不区分更新还是插入,当不存在该键时返回1,存在时返回0
+
+**判断key是否存在**
+
+```
+HEXISTS name key
+```
+
+存在返回1,不存在返回0
+
+**当key不存在时赋值**
+
+```
+HSETNX  name key value
+```
+
+如果key存在不执行任何操作
+
+**增加数字**
+
+```
+HINCRBY name key number
+HINCRBYFLOAT name key number
+```
+
+**删除字段**
+
+```
+HDEL name key[key...]
+返回删除的key个数
+```
+
+**只获取字段名或字段值或key数量**
+
+```
+HKEYS name
+HVALS name
+HLEN name
+```
+
+### 3.4 列表类型
+
+列表可以存储一个 **有序** 的字符串列表,常用的操作是向列表两端添加元素或者获得列表的某一个片段
+
+列表内部使用双向链表实现,所以向两端添加元素的时间复杂度O(1),获取越接近两端的元素速度就越快.
+
+但是通过索引访问元素比较慢,因为要一个一个的读取到第n位
+
+这些特性使得redis还可以作为队列使用
+
+列表最多容纳2**32-1个元素
+
+#### 3.4.2 命令
+
+```
+LPUSH name value [value...] 向左边增加元素
+RPUSH name value [value...] 向右边增加元素
+
+LPOP name 从左边弹出元素
+RPOP name 从右边弹出元素
+
+LLEN name 获取元素个数
+
+LRANGE name start end 获取区间内元素索引可以是负数,例如lrange numbers -5 -1
+
+LREM name count value 删除列表前count个值为value的元素,count>0时从左边开始删除,count<0时从右边开始删除,count=0时删除所有值为value的元素
+
+LINDEX name index 获取指定index位置的值,index>0从左边开始,index<0从右边开始
+
+LSET name index value 设置指定index位置的值 index>0从左边开始,index<0从右边开始
+
+LTRIM name start end 只保留指定范围内的元素,start end 可以是负数
+
+LISERT name BEFORE|AFTER pivot value,从左边查找值为第一个pivot的元素,然后将value插入
+
+RPOPLPUSH source destination 将source元素从右边开始弹出,并从destination左边开始插入
+```
+
+### 3.5 集合类型
+
+集合可以存储2**32-1 个元素,所有元素唯一,元素无序.内部通过值为空的散列表(hash table)来实现,所有插入删除,时间复杂度为O(1).还支持并,交,差运算
+
+#### 3.5.1 命令
+
+```
+SADD name member [member] 返回新增元素个数
+
+SREM name member [member...] 返回删除成功的个数
+
+SMEMBERS name 获取所有的元素
+
+SISMEMBER name member 返回0 member不存在 返回1 member存在
+
+SDIFF name [name...] 差操作
+
+SINTER name [name...] 交操作
+
+SUNION name [name...] 并操作
+
+SCARD name 获得集合元素个数
+
+SDIFFSTORE destination name [name] 差操作后存入destination
+
+SINTERSTORE destination name [name...] 交操作后存入destination
+
+SUNIONSTORE destination name [name...] 并操作后存入destination
+
+SRANDMEMBER name [count] 随机返回count个元素,count>0时,返回不重复的元素,count<0时元素可能相同
+
+SPOP name从集合中弹出一个元素
+```
+
+### 3.6 有序集合
+
+每一个元素都关联了一个分数,这使得不仅可以完成插入,删除,判断等操作还能够根据分数最高或者最低的前N个元素,获得指定分数范围内的元素等与分数有关的操作.
+
+有序集合和列表的区别
+
+- 二者都是有序的
+- 都可以获得某一范围内的元素
+- 列表通过链表实现,获取两端数据较快,获取中间数据较慢,
+- 有序集合使员工散列表和跳跃表,读取中间的数据也很快(时间复杂度O(log(N)))
+- 列表中不能简单的调整某个元素的位置,单有序集合可以通过该分数实现
+- 有序集合比列表更耗内存
+
+#### 3.6.1 命令
+
+```
+ZADD name score member [score member] 添加元素,返回新增元素个数 score可以是整数,也可以是浮点数
+
+ZSCORE name member 获得元素的分数
+
+ZRANGE name start stop [WITHSCORES]按照元素分数从小到大从start到end去除元素,start和end可以是负数. withscores在取出元素时也也取出元素分数.默认redis会按照0<9<A<Z<a<z来排序
+
+ZRANGBYSCORE name min max [WITHSCORES] [LIMIT offset count]
+
+ZINCRBY name increment member 增加一个元素的分数,返回更改后的分数
+
+ZCARD name 获取元素个数
+
+ZCOUNT name min max 获取执行范围内个数
+
+ZREM name member [member]删除元素
+
+ZREMRANGESCORE name min max 删除指定分数范围内圆度
+
+ZRANK name member 获得元素的排名从小到大排
+
+ZREVRANK name member 获得元素排名从大到小排
+
+ZINTERSTORE destination numkeys key [key...] [WEIGHTS weight [weight...]] [AGGREGATE SUM|MIN|MAX]有序集合的交集
+AGGREGATE SUM表示destination中元素的分数是每个参与计算的集合中该元素分数的和,MIN分数是每个参与计算的集合中该元素分数的最小值,MAX参与计算的集合中该元素根数的最大值
+weight每个集合参与计算时会乘上该集合的权重
+
+ZUNIONSTORE destination numkeys key [key...] [WEIGHTS weight [weight...]] [AGGREGATE SUM|MIN|MAX]
+```
 
 ## 4 进阶
 
