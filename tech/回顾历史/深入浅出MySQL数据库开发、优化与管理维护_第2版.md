@@ -715,9 +715,9 @@ begin
 
     repeat
         fetch cur_payment into i_staff_id, d_amount;
-            if i_staff_id = 2 then  
+            if i_staff_id = 2 then
                 set @x1 = @x1 + d_amount;
-            else    
+            else
                 set @x2 = @x2 + d_amount;
             end if;
     until 0 end repeat;
@@ -768,7 +768,7 @@ END LOOP [end_label]
 create procedure actor_insert()
 begin
     set @x=0;
-    ins:LOOP    
+    ins:LOOP
         set @x=@x+1;
         if @x=100 then
             leave ins;
@@ -784,7 +784,7 @@ $$
 create procedure actor_insert()
 begin
     set @x=0;
-    ins:LOOP    
+    ins:LOOP
         set @x=@x+1;
         if @x=100 then
             leave ins;
