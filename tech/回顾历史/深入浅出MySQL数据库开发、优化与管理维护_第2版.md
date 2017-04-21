@@ -2010,3 +2010,7 @@ statement、row、mixed
 master1，master2互为主从，master1入则读写，master2负责读。应用选择其中一作为读
 
 ### 复制搭建过程
+
+
+## 附录
+查看表创建语句:`show create table jos_modules`

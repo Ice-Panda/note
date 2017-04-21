@@ -24,6 +24,7 @@ Tastypie可以是models完全开放,但是你可以完全控制你想要开放�
 唯一强制需要的配置是在INSTALLED_APPS中添加`tastypie`,tastypie的拥有正常的默认配置,并且不是必须的,除非你需要需改他们.详见(tastypie配置)
 
 ## 文档
+`curl http://localhost:8000/api/v1/ `获取资源简要信息`http://localhost:8000/api/v1/?fullschema=true`获取所有信息
 
 Resources.dispatch_list,调用dispatch
 Resources.dispatch,取出Meta中配置的lists_allowed_methods,检查HTTP_X_HTTP_METHOD_OVERRIDE是否改写,request.method检查是否可处理,查找对应的处理方法,如果没有找到就报错,检查是否`is_authenticated`,检查`throttle_check`,调用method,调用`throttle`
@@ -189,7 +190,7 @@ urlpatterns = [
 ]
 ```
 
-调用c`url http://localhost:8000/api/v1/`返回当前api接口下所有的资源
+调用`curl http://localhost:8000/api/v1/`返回当前api接口下所有的资源
 
 ```javascript
 {
@@ -229,7 +230,81 @@ urlpatterns = [
     },
 }
 ```
+如果想要获取指定的资源,例如获取id为1,2,4的资源,可用`curl http://localhost:8000/api/v1/user/set/1;2;4`
 
+使用post创建对象时的返回头为
+
+```shell
+# 创建一个资源POST
+curl --dump-header - -H "Content-Type: application/json" -X POST --data '{"body": "This will prbbly be my lst post.", "pub_date": "2011-05-22T00:46:38", "slug": "another-post", "title": "Another Post", "user": "/api/v1/user/1/"}' http://localhost:8000/api/v1/entry/
+
+# 这里使用了--dump-header.如果发生错误时这里的返回头信息会有帮助
+
+HTTP/1.0 201 CREATED
+Date: Fri, 20 May 2011 06:48:36 GMT
+Server: WSGIServer/0.1 Python/2.7
+Content-Type: text/html; charset=utf-8
+Location: http://localhost:8000/api/v1/entry/4/
+
+# 更新一条资源PUT
+curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"body": "This will probably be my last post.", "pub_date": "2011-05-22T00:46:38", "slug": "another-post", "title": "Another Post", "user": "/api/v1/user/1/"}' http://localhost:8000/api/v1/entry/4/
+After fixing up the body, we get back:
+
+HTTP/1.0 204 NO CONTENT
+Date: Fri, 20 May 2011 07:13:21 GMT
+Server: WSGIServer/0.1 Python/2.7
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+
+# 部分更新PATCH
+curl --dump-header - -H "Content-Type: application/json" -X PATCH --data '{"body": "This actually is my last post."}' http://localhost:8000/api/v1/entry/4/
+To which we should get back:
+
+HTTP/1.0 202 ACCEPTED
+Date: Fri, 20 May 2011 07:13:21 GMT
+Server: WSGIServer/0.1 Python/2.7
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+
+更新多条数据PUT
+curl --dump-header - -H "Content-Type: application/json" -X PUT --data '{"objects": [{"body": "Welcome to my blog!","id": "1","pub_date": "2011-05-20T00:46:38","resource_uri": "/api/v1/entry/1/","slug": "first-post","title": "First Post","user": "/api/v1/user/1/"},{"body": "I'm really excited to get started with this new blog. It's gonna be great!","id": "3","pub_date": "2011-05-20T00:47:30","resource_uri": "/api/v1/entry/3/","slug": "my-blog","title": "My Blog","user": "/api/v1/user/2/"}]}' http://localhost:8000/api/v1/entry/
+
+# 删除一条资源
+curl --dump-header - -H "Content-Type: application/json" -X DELETE  http://localhost:8000/api/v1/entry/4/
+Once again, we get back the “Accepted” response of a 204:
+
+HTTP/1.0 204 NO CONTENT
+Date: Fri, 20 May 2011 07:28:01 GMT
+Server: WSGIServer/0.1 Python/2.7
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+
+# 删除整个资源
+curl --dump-header - -H "Content-Type: application/json" -X DELETE  http://localhost:8000/api/v1/entry/
+As a response, we get:
+
+HTTP/1.0 204 NO CONTENT
+Date: Fri, 20 May 2011 07:32:51 GMT
+Server: WSGIServer/0.1 Python/2.7
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+
+# 执行多个操作,这了执行了创建和删除
+curl --dump-header - -H "Content-Type: application/json" -X PATCH --data '{"objects": [{"body": "Surprise! Another post!.", "pub_date": "2012-02-16T00:46:38", "slug": "yet-another-post", "title": "Yet Another Post"}], "deleted_objects": ["http://localhost:8000/api/v1/entry/4/"]}'  http://localhost:8000/api/v1/entry/
+
+HTTP/1.0 202 ACCEPTED
+Date: Fri, 16 Feb 2012 00:46:38 GMT
+Server: WSGIServer/0.1 Python/2.7
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+```
+
+删除所有数据`delete api/v1/user/`
+## 状态码
+- 201 创建成功
+- 204 PUT更新成功,DELETE成功
+- 202 PATCH更细成功
+- 404 DELETE失败,
 ## Tastypie 设置
 
 ### API_LIMIT_PER_PAGE 可选 默认20
@@ -331,7 +406,7 @@ tastypie使用`Dehydrate`过程,将原始的复杂model数据转换成用户可�
 
 ### 每个字段的Dehydrate
 
-每个字段有自己的`Dehydrate`方法.如果她知道如何获取数据(例如,指定`attribute`参数),那么他会尝试填充.
+每个字段有自己的`Dehydrate`方法.如果她知道如何获取数据(例如,指定字段的`attribute`参数),那么他会根据attribute尝试自动填充.
 
 返回值会通过字段名插入到`bundle.data`字典中
 

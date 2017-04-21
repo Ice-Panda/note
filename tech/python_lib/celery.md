@@ -1,8 +1,11 @@
 # 分布式任务队列
 
-Celery的工作单元是消息队列中的小。celery支持多种broker(例如RabbitMQ，Redis)
+Celery的工作单元是消息队列中的消息。celery支持多种broker(例如RabbitMQ，Redis)
 
-## 经Celery应用到系统中
+# First Steps with Celery
+Celery推荐使用rabbitmq作为消息队列
+
+## 将Celery应用到系统中
 
 结构
 
