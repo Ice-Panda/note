@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s (%(threadName)-10
 import multiprocessing
 import time
 import random
+from threading import Thread
 
 class Myfancyclass(object):
     def __init__(self, name):
@@ -23,14 +24,16 @@ class Myfancyclass(object):
 
 def worker(q):
     obj = q.get()
-    obj.do_something()
+    time.sleep(random.randint(1,3))
+    print(i)
 
 
 queue = multiprocessing.Queue()
+
 for i in range(3):
     p = multiprocessing.Process(target=worker, args=(queue,))
     p.start()
-    queue.put(Myfancyclass('fancy dan'))
+    queue.put(i)
 queue.close()
 queue.join_thread()
 p.join()
