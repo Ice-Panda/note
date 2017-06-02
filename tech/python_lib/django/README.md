@@ -3,7 +3,7 @@
 django runserver 启动流程
 
 - 执行 `./manage.py runserver` --> 调用`django.core.management`中`execute_from_command_line(sys.argv)`
-> django-admin 也是调用此方法
+    > django-admin 也是调用此方法
 - 新建 `utility = ManagementUtility(argv)`
 - 调用 `utility.execute()`
 
