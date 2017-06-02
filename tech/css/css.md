@@ -2,29 +2,119 @@
 
 ## 选择器
 
-- h1 input 后代元素
-- h1 > input 子元素
-- h1 + p 相邻的下一个同一级元素
-- [attribute] 用于选取带有指定属性的元素。
-- [attribute=value] 用于选取带有指定属性和值的元素。
-- [attribute~=value] 用于选取属性值中包含指定词汇的元素。
-- [attribute|=value] 用于选取带有以指定值开头的属性值的元素，该值必须是整个单词。
-- [attribute^=value] 匹配属性值以指定值开头的每个元素。
-- [attribute$=value] 匹配属性值以指定值结尾的每个元素。
-- [attribute*=value] 匹配属性值中包含指定值的每个元素。
-- :active 向被激活的元素添加样式。
-- :focus 向拥有键盘输入焦点的元素添加样式。
-- :hover 当鼠标悬浮在元素上方时，向元素添加样式。
-- :link 向未被访问的链接添加样式。
-- :visited 向已被访问的链接添加样式。
-- :first-child 向元素的第一个子元素添加样式。
-- :last-child 向元素的最后一个子元素添加样式。
-- :after 向元素的后面添加样式。
-- :lang 向带有指定lang属性的元素添加样式。
-- :first-letter 向文本的第一个字母添加特殊样式。
-- :first-line 向文本的首行添加特殊样式。
-- :before 在元素之前添加内容。
-- :after 在元素之后添加内容。
+```
+- .class   .intro    Selects all elements with class="intro"    1
+- #id       #firstname    Selects the element with id="firstname"    1
+- *           *    Selects all elements    2
+- element    p    Selects all <p> elements    1
+- element,element    div, p    Selects all <div> elements and all <p> elements    1
+- element element    div p    Selects all <p> elements inside <div> elements    1
+- element>element    div > p    Selects all <p> elements where the parent is a <div> element    2
+- element+element    div + p    Selects all <p> elements that are placed immediately after <div> elements    2
+- element1~element2    p ~ ul    Selects every <ul> element that are preceded by a <p> element    3
+- [attribute]            [target]    包含此属性
+- [attribute=value]        [target=_blank] 等于
+- [attribute~=value]    [title~=flower]    包含单词
+- [attribute|=value]    [lang|=en]    lang=en的所有元素    2
+- [attribute^=value]    a[href^="https"] 开头
+    - [attribute$=value]    a[href$=".pdf"]    结尾
+- [attribute*=value]    a[href*="w3schools"]    包含
+- :active    a:active
+- ::after    p::after    在元素后面插入
+- ::before    p::before    在元素之前插入
+- :checked    input:checked    所有checked input元素3
+- :disabled    input:disabled    所有diable的input元素
+- :empty    p:empty    选择所有不包含子元素的p元素(包含文本节点)
+- :enabled    input:enabled    所有enabled的input元素
+- :first-child    p:first-child    选则所有作为第一个子元素的p元素
+- ::first-letter    p::first-letter    选择所有元素的第一个字符
+- ::first-line    p::first-line    选择所有元素的第一行
+- :first-of-type    p:first-of-type    Selects every <p> element that is the first <p> element of its parent
+- :focus    input:focus    所有focus状态的input元素
+- :hover    a:hover    鼠标移动到元素上时
+- :in-range    input:in-range    选择值在指定范围内的input元素
+- :invalid    input:invalid    选择值是valid的input元素
+- :lang(language)    p:lang(it)    选择所有lang为it的元素
+- :last-child    p:last-child    选择作为父级最后一个子元素的元素
+- :last-of-type    p:last-of-type    Selects every <p> element that is the last <p> element of its parent    3
+- :link    a:link    选择所有为访问的a
+- :not(selector)    :not(p)    选择所有不是<p>的元素 这里p可以替换为class id等
+- :nth-child(n)    p:nth-child(2)    选择左右作为第n个子元素的p元素
+- :nth-last-child(n)    p:nth-last-child(2)    从尾部开始计算
+- :nth-last-of-type(n)    p:nth-last-of-type(2)    Selects every <p> element that is the second <p> element of its parent, counting from the last child    3
+- :nth-of-type(n)    p:nth-of-type(2)    Selects every <p> element that is the second <p> element of its parent    3
+- :only-of-type    p:only-of-type    Selects every <p> element that is the only <p> element of its parent    3
+- :only-child    p:only-child    Selects every <p> element that is the only child of its parent    3
+- :optional    input:optional    所有非required得input元素
+- :out-of-range    input:out-of-range     选择值不在指定范围内的input元素
+- :read-only    input:read-only 所有readonly得input
+- :read-write    input:read-write    选择非只读input
+- :required    input:required    所有required的input
+- :root    :root    Selects the document's root element    3
+- ::selection    ::selection    Selects the portion of an element that is selected by a user
+- :target    #news:target    Selects the current active #news element (clicked on a URL containing that anchor name)    3
+- :valid    input:valid    所有valid的input
+- :visited    a:visited 所有访问过的a
+```
+
+## 函数
+
+cal()
+
+```css
+#div1 {
+    position: absolute;
+    left: 50px;
+    width: calc(100% - 100px);
+    border: 1px solid black;
+    background-color: yellow;
+    padding: 5px;
+    text-align: center;
+}
+```
+
+attr()
+
+```css
+a:after {
+    content: " (" attr(href) ")";
+}
+```
+
+## 实体
+
+可以使用 [实体字符](https://www.w3schools.com/cssref/css_entities.asp) 来填写字符
+
+```css
+i:after {
+    content: ' \00A7';
+}
+```
+
+## 单位
+
+### 相对长度
+
+- em Relative to the font-size of the element (2em means 2 times the size of the current font) Try it
+- ex Relative to the x-height of the current font (rarely used) Try it
+- ch Relative to width of the "0" (zero)
+- rem Relative to font-size of the root element
+- vw Relative to 1% of the width of the viewport* Try it
+- vh Relative to 1% of the height of the viewport* Try it
+- vmin Relative to 1% of viewport's* smaller dimension Try it
+- vmax Relative to 1% of viewport's* larger dimension Try it
+- %
+
+### 绝对长度
+
+```
+- cm    centimeters Try it
+- mm    millimeters Try it
+- in    inches (1in = 96px = 2.54cm) Try it
+- px *    pixels (1px = 1/96th of 1in) Try it
+- pt    points (1pt = 1/72 of 1in) Try it
+- pc    picas (1pc = 12 pt)
+```
 
 ## 字体
 
@@ -64,8 +154,11 @@ transform: rotate(30deg);
 - translate(x,y) 定义 2D 转换，沿着 X 和 Y 轴移动元素。
 
 - translateX(n) 定义 2D 转换，沿着 X 轴移动元素。
+
 - translateY(n) 定义 2D 转换，沿着 Y 轴移动元素。
+
 - scale(x,y) 定义 2D 缩放转换，改变元素的宽度和高度。
+
 - scaleX(n) 定义 2D 缩放转换，改变元素的宽度。
 - scaleY(n) 定义 2D 缩放转换，改变元素的高度。
 - rotate(angle) 定义 2D 旋转，在参数中规定角度。
@@ -255,7 +348,7 @@ animation:myfirst 5s;
 - animation-play-state 规定动画是否正在运行或暂停。默认是 "running"。
 - animation-fill-mode 规定对象动画时间之外的状态。
 
-##  新的用户界面属性(基本不支持)
+## 新的用户界面属性(基本不支持)
 
 - appearance 允许您将元素设置为标准用户界面元素的外观 3
 - box-sizing 允许您以确切的方式定义适应某个区域的具体内容。 3
@@ -267,3 +360,124 @@ animation:myfirst 5s;
 - nav-up 规定在使用 arrow-up 导航键时向何处导航。 3
 - outline-offset 对轮廓进行偏移，并在超出边框边缘的位置绘制轮廓。 3
 - resize 规定是否可由用户对元素的尺寸进行调整。 3
+
+## 颜色渐变
+
+- linear-gradient 线性渐变
+- radial-gradient 径向梯度
+- repeating-linear-gradient 重复线性渐变
+- repeating-radial-gradient 重复径向梯度
+
+background: linear-gradient(direction, color-stop1, color-stop2, ...);
+
+```css
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left, red , yellow); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, red, yellow); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, red, yellow); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, red , yellow); /* Standard syntax */
+}
+// 从左上角开始
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(left top, red, yellow); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(bottom right, red, yellow); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(bottom right, red, yellow); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to bottom right, red, yellow); /* Standard syntax */
+}
+```
+
+线性渐变使用角度来制定方向
+
+如果想要更多地控制渐变的方向，您可以定义一个角度，而不是预定义的方向（从底部到顶部，从右到左，到右下角等）。
+
+```css
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient(-90deg, red, yellow); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(-90deg, red, yellow); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(-90deg, red, yellow); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(-90deg, red, yellow); /* Standard syntax */
+}
+```
+
+重复线性
+
+```css
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  /* Safari 5.1 to 6.0 */
+  background: -webkit-repeating-linear-gradient(red, yellow 10%, green 20%);
+  /* Opera 11.1 to 12.0 */
+  background: -o-repeating-linear-gradient(red, yellow 10%, green 20%);
+  /* Firefox 3.6 to 15 */
+  background: -moz-repeating-linear-gradient(red, yellow 10%, green 20%);
+  /* Standard syntax */
+  background: repeating-linear-gradient(red, yellow 10%, green 20%);
+}
+```
+
+径向梯度
+
+```css
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  background: -webkit-radial-gradient(red 5%, yellow 15%, green 60%); /* Safari 5.1-6.0 */
+  background: -o-radial-gradient(red 5%, yellow 15%, green 60%); /* For Opera 11.6-12.0 */
+  background: -moz-radial-gradient(red 5%, yellow 15%, green 60%); /* For Firefox 3.6-15 */
+  background: radial-gradient(red 5%, yellow 15%, green 60%); /* Standard syntax */
+}
+
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  background: -webkit-radial-gradient(circle, red, yellow, green); /* Safari */
+  background: -o-radial-gradient(circle, red, yellow, green); /* Opera 11.6 to 12.0 */
+  background: -moz-radial-gradient(circle, red, yellow, green); /* Firefox 3.6 to 15 */
+  background: radial-gradient(circle, red, yellow, green); /* Standard syntax */
+}
+
+/*使用不同大小的关键字*/
+/*size参数定义了渐变的大小。它可以取四个值：
+最近端
+最远的端
+最近的角
+最远的角落*/
+#grad1 {
+  background: red; /* For browsers that do not support gradients */
+  /* Safari 5.1 to 6.0 */
+  background: -webkit-radial-gradient(60% 55%, closest-side, red, yellow, black);
+  /* For Opera 11.6 to 12.0 */
+  background: -o-radial-gradient(60% 55%, closest-side, red, yellow, black);
+  /* For Firefox 3.6 to 15 */
+  background: -moz-radial-gradient(60% 55%, closest-side, red, yellow, black);
+  /* Standard syntax */
+  background: radial-gradient(closest-side at 60% 55%, red, yellow, black);
+}
+#grad2 {
+  /* Safari 5.1 to 6.0 */
+  background: -webkit-radial-gradient(60% 55%, farthest-side, red, yellow, black);
+  /* Opera 11.6 to 12.0 */
+  background: -o-radial-gradient(60% 55%, farthest-side, red, yellow, black);
+  /* For Firefox 3.6 to 15 */
+  background: -moz-radial-gradient(60% 55%, farthest-side, red, yellow, black);
+  /* Standard syntax */
+  background: radial-gradient(farthest-side at 60% 55%, red, yellow, black);
+}
+```
+
+重复径向梯度
+
+```css
+#grad {
+  background: red; /* For browsers that do not support gradients */
+  /* For Safari 5.1 to 6.0 */
+  background: -webkit-repeating-radial-gradient(red, yellow 10%, green 15%);
+  /* For Opera 11.6 to 12.0 */
+  background: -o-repeating-radial-gradient(red, yellow 10%, green 15%);
+  /* For Firefox 3.6 to 15 */
+  background: -moz-repeating-radial-gradient(red, yellow 10%, green 15%);
+  /* Standard syntax */
+  background: repeating-radial-gradient(red, yellow 10%, green 15%);
+}
+```

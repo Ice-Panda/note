@@ -648,4 +648,3 @@ const global = getGlobal();
 ```
 
 上面代码将顶层对象放入变量`global`。
-
