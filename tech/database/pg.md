@@ -69,3 +69,6 @@ SELECT doc->'Address'->'city'->>'city', doc#>>'{Address, city, Street}' FROM tes
 ```
 
 **目前还没有办法单独更新json中的某个字段**
+
+
+##  [JSON 函数和操作](https://www.postgresql.org/docs/9.5/static/functions-json.html)
