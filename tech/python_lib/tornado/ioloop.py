@@ -124,6 +124,7 @@ class IOLoop(Configurable):
     .. versionchanged:: 4.2
        Added the ``make_current`` keyword argument to the `IOLoop`
        constructor.
+    
     """
     # Constants from the epoll module
     _EPOLLIN = 0x001
