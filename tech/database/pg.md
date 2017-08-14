@@ -72,3 +72,17 @@ SELECT doc->'Address'->'city'->>'city', doc#>>'{Address, city, Street}' FROM tes
 
 
 ##  [JSON 函数和操作](https://www.postgresql.org/docs/9.5/static/functions-json.html)
+
+# 文档
+
+## 允许远程链接
+
+```bash
+# vim /etc/postgresql/9.5/main/postgresql.conf
+listen_addresses = '*'
+
+# vim /etc/postgresql/9.5/main/pg_hba.conf
+# IPv4 local connections:
+host    all             all             192.168.1.1/24          md5
+```
+

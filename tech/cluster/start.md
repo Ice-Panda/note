@@ -139,6 +139,13 @@ repl_backlog_histlen:0
 ### 集群
 
 
+## RabbitMQ
+
+```shell
+rabbitmqctl add_vhost v_host_spider
+rabbitmqctl add_user spider spider_pwd
+rabbitmqctl set_permissions -p v_host_spider spider '.*' '.*' '.*'
+```
 
 ## postgresql
 
