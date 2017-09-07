@@ -140,6 +140,35 @@ supervisord对信号的处理
 
 ## 配置文件
 
+## 环境变量
+
+可以直接使用环境变量
+```ini
+[program:example]
+command=/usr/bin/example --loglevel=%(ENV_LOGLEVEL)s
+```
+
+## unix http server
+
+监听unix domain socket.如果没有配置的话,unix domain server不会启动
+
+### file (可空)
+
+domain文件地址,例如:`/tmp/supervisord.sock`.HTTP/XML-RPC请求会发送给他.可以使用`%(here)s`参数,他表示配置文件的地址
+
+
+### chmod (可空)
+ 
+默认0777, UNIX domain socket权限
+
+### chown (可空)
+
+默认使用启动者和组
+
+socket所属用户和组
+
+### 
+
 ### [program:x]
 
 ### command
