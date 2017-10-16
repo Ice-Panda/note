@@ -37,3 +37,8 @@ request.send(formData);
 
 如果直接写入Blob,那么第三个参数可以为Blob添加文件名
 
+
+#  [Range](https://www.quirksmode.org/dom/range_intro.html)
+
+
+# Selection
