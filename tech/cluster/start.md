@@ -168,6 +168,9 @@ create role dev superuser login password 'smart';
 ```
 sudo vim /etc/postgresql/9.5/main/pg_hba.conf
 
+# "local" is for Unix domain socket connections only
+local   all             all                                     md5
+# IPv4 local connections:
 host all all 0.0.0.0/0 md5
 
 sudo vim /etc/postgresql/9.5/main/postgresql.conf

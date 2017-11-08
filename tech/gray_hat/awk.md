@@ -173,3 +173,8 @@ Array["birth"]="1987"
 
 ## 单引号
 `awk '{print "\047"}'`
+
+```
+head  all_title_df.csv|awk -F, '{last=$NF;second=$(NF-1);third=$(NF-2))}' #倒数位置
+awk -F, -v i=$i '{count=$10;if(count==i) print count,$0}' > 120/$i; i=$[i+1]; done#使用环境参数
+```

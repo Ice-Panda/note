@@ -3,6 +3,8 @@
 设置登录密码
 /etc/redis/redis.conf requirepass pwd
 
+/etc/redis/redis.conf bind 0.0.0.0
+
 (error) ERR max number of clients reached`kill -9 redis-pid `
 
 ## 1 简介
