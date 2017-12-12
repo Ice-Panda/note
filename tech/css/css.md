@@ -475,3 +475,81 @@ background: linear-gradient(direction, color-stop1, color-stop2, ...);
   background: repeating-radial-gradient(red, yellow 10%, green 15%);
 }
 ```
+
+
+## object-fit 
+
+img 和 video 大小
+
+fill - This is default. The replaced content is sized to fill the element's content box. If necessary, the object will be stretched or squished to fit
+
+contain - The replaced content is scaled to maintain its aspect ratio while fitting within the element's content box
+
+cover - The replaced content is sized to maintain its aspect ratio while filling the element's entire content box. The object will be clipped to fit
+
+none - The replaced content is not resized
+
+scale-down - The content is sized as if none or contain were specified (would result in a smaller concrete object size)
+
+## Multi-column
+
+- column-count	Specifies the number of columns an element should be divided into
+- column-fill	Specifies how to fill columns
+- column-gap	Specifies the gap between the columns
+- column-rule	A shorthand property for setting all the column-rule-* properties
+- column-rule-color	Specifies the color of the rule between columns
+- column-rule-style	Specifies the style of the rule between columns
+- column-rule-width	Specifies the width of the rule between columns
+- column-span	Specifies how many columns an element should span across
+- column-width	Specifies a suggested, optimal width for the columns
+- columns	A shorthand property for setting column-width and column-count
+
+## User Interface Properties
+
+- box-sizing	Allows you to include the padding and border in an element's total width and height
+- nav-down	Specifies where to navigate when using the arrow-down navigation key
+- nav-index	Specifies the tabbing order for an element
+- nav-left	Specifies where to navigate when using the arrow-left navigation key
+- nav-right	Specifies where to navigate when using the arrow-right navigation key
+- nav-up	Specifies where to navigate when using the arrow-up navigation key
+- outline-offset	Adds space between an outline and the edge or border of an element
+- resize	Specifies whether or not an element is resizable by the user
+
+## Media Queries
+
+```css
+
+@media screen and (max-width: 699px) and (min-width: 520px) {
+    ul li a {
+        padding-left: 30px;
+        background: url(email-icon.png) left center no-repeat;
+    }
+}
+
+@media screen and (max-width: 1000px) and (min-width: 700px) {
+    ul li a:before {
+        content: "Email: ";
+        font-style: italic;
+        color: #666666;
+    }
+}
+
+
+@media screen and (min-width: 1001px) {
+    ul li a:after {
+        content: " (" attr(data-email) ")";
+        font-size: 12px;
+        font-style: italic;
+        color: #666666;
+    }
+}
+
+@media screen and (max-width: 699px) and (min-width: 520px), (min-width: 1151px) {
+    ul li a {
+        padding-left: 30px;
+        background: url(email-icon.png) left center no-repeat;
+    }
+}
+```
+
+## Grid `display: grid;`
