@@ -17,7 +17,7 @@
 - [attribute~=value]    [title~=flower]    包含单词
 - [attribute|=value]    [lang|=en]    lang=en的所有元素    2
 - [attribute^=value]    a[href^="https"] 开头
-    - [attribute$=value]    a[href$=".pdf"]    结尾
+- [attribute$=value]    a[href$=".pdf"]    结尾
 - [attribute*=value]    a[href*="w3schools"]    包含
 - :active    a:active
 - ::after    p::after    在元素后面插入
@@ -39,7 +39,7 @@
 - :last-of-type    p:last-of-type    Selects every <p> element that is the last <p> element of its parent    3
 - :link    a:link    选择所有为访问的a
 - :not(selector)    :not(p)    选择所有不是<p>的元素 这里p可以替换为class id等
-- :nth-child(n)    p:nth-child(2)    选择左右作为第n个子元素的p元素
+- :nth-child(n)    p:nth-child(2)    选择作为第n个子元素的p元素
 - :nth-last-child(n)    p:nth-last-child(2)    从尾部开始计算
 - :nth-last-of-type(n)    p:nth-last-of-type(2)    Selects every <p> element that is the second <p> element of its parent, counting from the last child    3
 - :nth-of-type(n)    p:nth-of-type(2)    Selects every <p> element that is the second <p> element of its parent    3
@@ -148,17 +148,11 @@ transform: rotate(30deg);
 
 - transform 向元素应用 2D 或 3D 转换。 3
 - transform-origin 允许你改变被转换元素的位置。 3
-
 - matrix(n,n,n,n,n,n) 定义 2D 转换，使用六个值的矩阵。
-
 - translate(x,y) 定义 2D 转换，沿着 X 和 Y 轴移动元素。
-
 - translateX(n) 定义 2D 转换，沿着 X 轴移动元素。
-
 - translateY(n) 定义 2D 转换，沿着 Y 轴移动元素。
-
 - scale(x,y) 定义 2D 缩放转换，改变元素的宽度和高度。
-
 - scaleX(n) 定义 2D 缩放转换，改变元素的宽度。
 - scaleY(n) 定义 2D 缩放转换，改变元素的高度。
 - rotate(angle) 定义 2D 旋转，在参数中规定角度。
