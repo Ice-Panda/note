@@ -228,5 +228,193 @@ DOM 事件的技术是事件托管。它基于这样一个事实:**事件逐层�
 
 ## 算法和流 程控制
 
+`for-in循环可以枚举任何对象的命名属性`,并且性能最差,一般不用
+
+保存length属性`let length=array_obj.length for(let i=0;i<length;i++)`
+
+倒序处理 `let length=array_obj.length for(let i=0;i--;)`
+
+减少迭代次数
+```
+var iterations = Math.floor(items.length / 8), 
+startAt = items.length % 8,
+i = 0;
+do {
+    switch(startAt){
+        case 0: process(items[i++]); 
+        case 7: process(items[i++]); 
+        case 6: process(items[i++]); 
+        case 5: process(items[i++]); 
+        case 4: process(items[i++]); 
+        case 3: process(items[i++]); 
+        case 2: process(items[i++]); 
+        case 1: process(items[i++]);
+    }
+    startAt = 0;
+} while (--iterations);
+```
+
+`Array.foreach Array.each 性能很差`
+
+### 条件表达式
+
+离散数值多时使用switch
+
+### 查表法
+
+当有大量离散值需要测试时，if-else 和 switch 都比使用查表法 要慢得多
+
+```JavaScript
+//define the array of results
+var results = [result0, result1, result2, result3, result4, result5, result6, result7, result8, result9, result10]
+//return the correct result
+return results[value];
+```
+
+### 调用栈
+
+```JavaScript
+function *fib(){
+    a=0
+    b=1
+    while(true){
+        yield a
+        c=b
+        b=a+b
+        a=c
+    }
+}
+```
+**太多的递归，超过最大调用栈尺**
+
+## 字符串和正则表达式
+
+尽量用[].join('')来合并多个字符创
+
+str+="one"+"two" 
+
+1. 创建临时字符串
+2. 临时字符串赋值为"onetwo"
+3. 临时字符串与str连接
+4. 连接结果赋值给str
+
+避免创建临时字符串
+`str+="one";str+="two"`性能提高10%~40%(python中也是如此)
+
+**nodejs中的异常表现(MBP2015 256 i7 16g node-v8.7.0测试环境)**
+```
+let s=""
+for(let i=0;i<10000000;i++){
+    s=s+'two'+'one'
+}
+real    0m3.438s
+user    0m3.564s
+sys     0m0.301s
+
+<!--  -->
+let s=""
+for(let i=0;i<10000000;i++){
+    s='two'+'one'+s
+}
+real    0m1.753s
+user    0m1.779s
+sys     0m0.166s
+<!--  -->
+let s=""
+for(let i=0;i<10000000;i++){
+    s+='two'+'one'
+}
+real    0m1.694s
+user    0m1.721s
+sys     0m0.167s
+
+```
+
+## 响应接口
+
+### 浏览器UI线程
+
+**JavaScript 和 UI 更新共享的进程通常被称作浏览器 UI 线程. UI 线程围绕着一个简单的队列系统工作，任务被保存到队列中直至进程空闲。一旦空闲，队列中的下一个任务将被检索和运行.**
+
+浏览器在 JavaScript 任务运行时间上采取了限制,此类限制有两个:调用栈尺寸限制和长时间脚本限制.
+
+检测脚本是否超过运行时间限制有多种度量方法:语句数量,执行时间
+
+脚本运行严格不超过100ms,通常应该在50ms内完成,用户才不会觉得卡顿
+
+
+### 用定时器让出时间片
+JavaScript 任务因为复杂性原因不能在 100 毫秒或更少时间内完成,让出对 UI 线程的控制,停止 JavaScript 运行,给 UI 线程机会进行更新，然后再继续运行 JavaScript.
+
+### 定时器
+
+setTimeout()或 setInterval()创建定时器，两个函数都接收一样的参数:一个要执行的函数，和一个运行它之前的等待时间(单位毫秒);到达指定时间时将任务放入队列当中.
+
+**定时器代码只有等创建它的函数运行完成之后，才有可能被执行,因为创建定时器的代码也是一个任务,该任务没有执行结束之前,任务队列中的下一个任务不会被执行**
+
+**在任何一种情况下，创建一个定时器造成 UI 线程暂停，如同它从一个任务切换到下一个任务。因此， 定时器代码复位所有相关的浏览器限制，包括长运行脚本时间。此外，调用栈也在定时器代码中复位为零。 这一特性使得定时器成为长运行 JavaScript 代码理想的跨浏览器解决方案**
+
+### 在数组处理中使用定时器
+
+如果数组中元素处理不需要同步并且不需要顺序处理,那么就可以使用定时器,但是也要控制好每次执行元素个数与间隔时间,防止整个数组处理时间过长.例如:每个元素处理1毫秒,每个时间间隔25ms,1000个元素就要26秒,如果每批处理50个,那么会变成1.5秒
+
+##  Ajax 
+
+readyState === 3的时候ajax开始接受数据===4的时候完全接受好数据,可以在===3的时候就开始处理数据,提高性能.
+
+在一次请求中获取多个数据,数据用特定分隔符分隔
+
+可以用img,script,link 在标签后面加上参数,来一次性提交多个get请求.也可以监听onload事件,来判断是否成功;**如果你不需要为此响应返回数据，那么你应当发送一个 204 No Content 响应代码，无消息正文。它将阻 止客户端继续等待永远不会到来的消息体**
+
+### 缓存
+
+httpresponse加入缓存头,ajax的get请求可以直接获取本地缓存
+
+### cookie少用,暂用带宽
+
+使用localStorage,sessionStorage等
+
+## 编程实践
+
+setTime eval 导致二次评估代码要,所以不可以使用字符串传递
+
+### 创建数组或对象时,用直接量
+
+```JavaScript
+//create an object
+var myObject = { 
+    name: "Nicholas", count: 50,
+    flag: true,
+    pointer: null 
+};
+//create an array
+var myArray = ["Nicholas", 50, true, null];
+```
+
+## toString 二进制
+
+JavaScript 可以很容易地将数字转换为字符串形式的二进制表达 式，通过使用 toString()方法并传入数字 2(做参数)。例如:
+```JavaScript
+var num1 = 25,
+num2 = 3; 
+alert(num1.toString(2)); //"11001" 
+alert(num2.toString(2)); // "11"
+```
+
+## Math是C++接口,应该尽量使用该接口
+
+
 ## 创建并部署高性能 JavaScript 应用程序
+
+- 合并JavaScript文件
+-  JavaScript 压缩
+
+## Tools 工具
+
+- Profiling 性能分析:在脚本运行期定时执行不同函数和操作，
+- Network analysis 网络分析:检查图片，样式表，和脚本的加载过程，汇报它们对整个页面加载和渲染的影响
+
+### JavaScript 性能分析
+
+使用Date
 
