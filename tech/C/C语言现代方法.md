@@ -1131,7 +1131,247 @@ sin是个函数,当函数名后面没有跟着圆括号时,C语言编译器会�
 
 # 声明
 
+存储类型:auto ,static,extern,register
+
+类型限定:const
+
+## static可以隐藏信息
+
+会在内存中一直存在,所以即使在函数内部也是可以使用指针指向的
+
+文件中最外层定义的static 变量只能在文件内访问
+
+函数内部定义,那么函数内一直可以访问,并且只会初始化一次
+
+## extern 
+
+extern 定义的变量是静态存储类型
+
+extern只是声明变量,该变量可以被多个文件共享
+
+## 函数存储类型
+
+static类型表明函数只可以在文件内访问
+
+## const
+
+const 声明的变量不可以作为数组声明的参数
+
+## 解释复杂声明 (没明白)
+
+`int *(*x[10])(void);`
+
+`*x[10]`是指针数组;
+
+简化声明
+```c
+typedef int *Fcn(void);
+typedef Fcn *Fcn_ptr;
+typedef Fcn_ptr Fcn_ptr_array[10];
+Fcn_ptr_array x;
+```
+
+## 初始化
+
+静态存储期限的变量初始化必须使用常量:`static int i=10;`
+
+数组初始化时也必须使用常量:`int a[]={1,2,3,4,5}`
 
 
+## 未初始化的变量
 
+# 程序设计
+
+## 模块
+
+函数生命在头文件中,变量声明为static放在文件顶部
+
+### 隐藏函数,不被外部调用
+
+```c
+#define Private static
+#define Public 
+```
+
+## 抽象数据类型
+
+
+# 低级程序设计
+
+按位操作
+
+- ~ 按位求反
+- & 按位与
+- ^ 按位异或
+- | 按位或
+- `<<` 左移位
+- `>>` 右移位
+
+# 标准库
+
+## 标准库的使用
+
+C语言标准库总共划分为15个部分,每个部分用一个头描述
+
+主要由函数原型,类型定义,宏定义组成
+
+## 对标准库中使用名字的一些限制
+
+不可以定义与头文件一样的名字,
+
+**有一个下划线和一个大写字母开头或由两个下划线开头的标识符,属于标准库保留标识符,程序不允许使用这种形式的标识符**
+
+**有一个下划线开头的标识符,用于文件作用域内的标识符和标记,除非仅声明在函数内部,否则不应该使用这类标识符**
+
+**标准库中所有外部链接的标识符被保留,所以即使没有包含stdio.h ,也不可以定义外部函数printf** 
+
+
+C语言允许在头中定义与库函数同名的宏,为了起到保护作用,还要求实际的函数存在
+
+`#define isprint(c) ((c)>=0x20 && (c)<=0x7e)`
+
+如果需要屏蔽宏可以使用`#undef isprint`这样就可以调用实际的函数,或者使用`(is_print)(c)`来屏蔽宏调用
+
+## 标准库
+
+- assert:诊断,一旦检查失败程序会终止
+- ctype:字符处理,包括用于字符分类及大小写转换的函数
+- errno:错误,errno是一个左值,以在调用特定库函数后进行检测,来判断调用过程是否有错误发生
+- float:浮点型的特性,提供描述浮点类型特性的宏,包括值得范围和精度
+- limits:整型的大小,提供了用于描述证书类型和字符类型特性的宏,包括他们的最大值和最小值
+- locale:本地化,提供一些函数来帮助程序使用针对一个国家或地区的特定行为方式,这些与本地化的相关行为包括数显示的方式(包括小数点的字符),货币的格式,字符集一集日期和时间的表示
+- math:数学计算,用于数学计算的函数,三角函数,双曲函数,指数函数,对数函数,幂函数,四舍五入函数,绝对值运算等,大部分函数使用double,并返回double
+- setjmp:非本地跳转,提供setjmp函数和longjmp函数,setjmp函数标记程序的一个位置,随后可以用longjmp返回被标记的位置,这些函数可以用来从一个函数跳转打另一个函数(仍然活动中),绕过正常的函数返回机制,setjmp和longjmp主要用来处理程序执行过程中的重大问题
+- signal:信号处理,提供异常情况(信号)处理的函数,包括中断和运行时错误,signal函数可以设置一个函数,使得系统会在给定信号发生后自动调用该函数,raise函数用来产生一个信号
+- stdarg:可变实际参数,提供给函数可以处理不定个数参数的工具,就像printf和scanf
+- stddef:常用定义,提供经常使用的类型和宏定义
+- stdio:输入/输出,提供大量用于输入和输出的函数,包括顺序读写和随机读写文件的操作
+- stdlib:常用的使用程序,包含大量无法划归于其他头的函数,包括,可以将字符串转换成数,产生伪随机数,执行内存管理任务,与操作系统通信,执行搜索与排序以及对多自己字符及字符串进行操作
+- string:字符串处理,宝库哦复制,拼接,比较和搜索
+- time:日期和时间,提供相应的函数来获取日期和时间,操作时间和以多种方式显示时间等
+
+
+# 非局部跳转
+
+goto语句只能在函数内部跳转,
+setjmp宏标记程序的一个位置,longjmp跳转到该位置,它主要被用来做错误处理
+
+# 国际化
+
+## 类别
+
+- LC_COLLATE 影响两个字符串比较函数的行为(strcoll和strxfrm,在string中)
+- LC_CTYPE 影响ctype中函数的行为(除了isdigit和isxdigit),同时还影响stdlib中多字节函数
+- LC_MONETARY 影响有localeconv函数返回的货币格式信息,不赢下任何库函数行为
+- LC_NUMERIC 影响格式化输入和输出函数(printf和scanf)使用的小数点字符以及stdli中字符转换函数(atof和strtod)还会影响localeconv函数返回的货币格式
+- LC_TIME 影响strftime函数的行为,该函数将时间转换成字符串
+
+## setlocale函数
+
+`char *setlocale(int category,const char *locale)`
+
+修改当前的地点,可以针对一个类型,或所有类型,第一个参数是`LC_COLLATE,LC_CTYPE,LC_MONETARY,LC_NUMERIC,LC_TIME`之一,或者`LC_ALL`
+
+第二个参数是"C"或者"",如果是"C"那么函数按照正常方式执行,如果想改变地区,那么设置为"".这样会切换到本地模式.
+
+## localeconv 
+
+`struct lconv *localeconv(void)`获取当前地区的信息
+
+lconv char*类型成员
+ 
+- `decimal_point` "." 十进制小数点的值
+- `thousands_sep` "" 十进制小数点前,用来分隔数字的字符
+- `grouping` "" 数字组的大小尺寸
+
+货币类
+
+- `int_curr_symbol` "" 国际货币符号
+- `currency_symbol` 区域货币符号
+- `mon_decimal_point` 十进制小数点符号
+- `mon_thousands_sep` 十进制小数点前,用来分隔数字的字符
+- `mon_grouping` 数字组的大小尺寸
+- `positive_sign` 用来说明非负值的字符串
+- `negative_sign` 用来说明负值的字符串
+
+
+```c
+#include <stdio.h>
+#include <locale.h>
+
+int main()
+{
+    struct lconv *c;
+    setlocale(LC_ALL,"");
+    c = localeconv();
+    printf("decimal_point: %s \n", c->decimal_point);
+    printf("thousands_sep: %s \n", c->thousands_sep);
+    printf("grouping: %s \n", c->grouping);
+    printf("int_curr_symbol: %s \n", c->int_curr_symbol);
+    printf("int_curr_symbol: %s \n", c->int_curr_symbol);
+    printf("currency_symbol: %s \n", c->currency_symbol);
+    printf("mon_decimal_point: %s \n", c->mon_decimal_point);
+    printf("mon_thousands_sep: %s \n", c->mon_thousands_sep);
+    printf("mon_grouping: %s \n", c->mon_grouping);
+    printf("positive_sign: %s \n", c->positive_sign);
+    printf("negative_sign: %s \n", c->negative_sign);
+    return 0;
+}
+```
+
+lconv char类型成员
+
+- `int_frac_digits`
+- `frac_digits`
+- `p_cs_precedes`
+- `p_sep_by_space`
+- `n_cs_precedes`
+- `n_sep_by_space`
+- `p_sign_posn`
+- `n_sign_posn`
+
+## 多字节字符和宽字符
+
+C语言允许编译器提供一种可扩展的字符集,这种字符集可以用于编写C程序,也可以用于程序运行的环境中,或者两种地方都有;C提供了两种用于可扩展字符集的编码:**多字节字符**和**宽字符**
+
+C还提供了把一种编码转换成另外一种编码的函数
+
+## 多字节字符
+
+一个或多个字节表示一个可扩展字符,任何可扩展的字符集必须包含C语言要求的基本字符,即字母,数字,运算符,标点符号,空白字符.并且必须是单字节的
+
+`MB_LEN_MAX`(limits中)说明任意区域多字节中字节的最大数量,`MB_CUR_MAX`(stdlib中)给出当前区域的最大值
+
+## 宽字符
+
+宽字符是一种其值表示字符的整数,采用特殊实现支持的所有宽字符都要求相同的字节数
+
+款字符具有`wchar_t`类型(stddef和stdlib都有定义),且他必须是整数类型才可以表示任何支持地区的可扩展字符集,例如两个自己足够表示任何可扩展字符集,那么将会把`wchat_r`定义成unsigned short int 类型
+
+C语言支持宽字符常量和宽字符字面量,宽字符类似于普通字符常量,只需要在前面加上`L`
+
+`L'a';L"abc"`
+
+unicode就是宽字符
+
+## 多字节字符函数
+
+`int mblen(const char*s,size_t n);`
+检测第一个参数是否指向形成有效多字节字符的字节序列,如果是返回字符中的字节数.如果不是范湖-1,如果指向空字符返回0,第二个参数限制mblen函数检测的字节的数量,通常情况下回传递`MB_CUR_LEN`
+
+`int mbtowc(wchar_t *pwc,const char *s,zise_t n);`
+
+`int wctomb(char *s,wchar_t wchar);`
+
+## 多字节字符串函数
+
+`size_t mbstowcs(wchar_t *pwcs,const char *s,size_t n)`
+
+`size_t wcstpmbs(char *s,const wchar_t *pwcs,size_t n)`
+
+# stdarg可变长参数
+
+```c
+PyAPI_FUNC(int) PyArg_ParseTuple(PyObject *, const char *, ...);
+```
 
