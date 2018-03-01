@@ -563,7 +563,7 @@ commit
 
 commit之后事务将会关闭,mysql回到自动commit状态
 
-# 全球化和本地化
+
 
 
 

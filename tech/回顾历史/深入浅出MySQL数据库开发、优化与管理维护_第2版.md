@@ -286,7 +286,7 @@ set类型可以一次选取多个成员，enum只能选一个 `insert into t2 va
 - ^ 位异或
 - ~ 位取反
 - << 位右移
-- > > 位左移
+- `>>` 位左移
 
 ## 常用函数
 
@@ -1671,7 +1671,8 @@ InnoDB实现了两种类型的行锁：
 - 共享锁：select * from table_name where ... lock in share mode;
 - 排它锁：select * from table_name where ... for update;
 
-select ... in share mode 加锁后再更新记录，以及 ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.17 PM.png) ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.28 PM.png) 当session1使用share mode之后session2也使用share mode。
+select ... in share mode 加锁后再更新记录，以及 ![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.17 PM.png) 
+![](./src/深入浅出MySQL/Screen Shot 2017-03-18 at 3.54.28 PM.png) 当session1使用share mode之后session2也使用share mode。
 
 此时session1企图更新数据，就必须要等待session2的锁释放
 
