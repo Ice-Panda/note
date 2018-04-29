@@ -64,9 +64,9 @@ HTTP 报文有一行一行简单的字符串组成。报文都是纯文本，不
 
 
 ```
-GET / HTTP/1.1\n
-Accept: text/*\n
-\n
+GET / HTTP/1.1\r\n
+Accept: text/*\r\n
+\r\n
 hello world
 ```
 
