@@ -147,6 +147,7 @@ class ManagementUtility:
     """
     def __init__(self, argv=None):
         self.argv = argv or sys.argv[:]
+        # 如果prog_name!='manage.py'就改为'python -m django'
         self.prog_name = os.path.basename(self.argv[0])
         if self.prog_name == '__main__.py':
             self.prog_name = 'python -m django'
@@ -295,35 +296,47 @@ class ManagementUtility:
         Given the command-line arguments, figure out which subcommand is being
         run, create a parser appropriate to that command, and run it.
         """
+        # 先找出二级指令,没有二级指令就打印帮助信息
         try:
             subcommand = self.argv[1]
         except IndexError:
             subcommand = 'help'  # Display help if no arguments were given.
 
+        # 预处理的选项,这些选项会和当前传递的选项有冲突,所以先解析出这些选项,这样用户传递的选项才不会被影响.
         # Preprocess options to extract --settings and --pythonpath.
         # These options could affect the commands that are available, so they
         # must be processed early.
         parser = CommandParser(None, usage="%(prog)s subcommand [options] [args]", add_help=False)
+        # 这里是指定settings文件
         parser.add_argument('--settings')
+        # 这里是指定python路径
         parser.add_argument('--pythonpath')
         parser.add_argument('args', nargs='*')  # catch-all
         try:
             options, args = parser.parse_known_args(self.argv[2:])
+            # 修改环境settings和pythonpath
             handle_default_options(options)
         except CommandError:
             pass  # Ignore any option errors at this point.
 
         try:
+            # django在启动时会创建settings = LazySettings()
+            # 通过读取os.environ.get('DJANGO_SETTINGS_MODULE'),来初始化settings对象
+            # settings是一个lazy对象,使用self._wrapped保存Settings对象,当读取属性时,lazy对象会先进行_setup,然后会调用getattr(self._wrapped,key)
+            # 当要读取INSTALLED_APPS时,会先进行_setup
+            # 说白了就是LazySetting对象读取属性时,会真正初始化Settings对象,并赋值给LazySetting._wrapped=Settings()
             settings.INSTALLED_APPS
         except ImproperlyConfigured as exc:
             self.settings_exception = exc
 
         if settings.configured:
+            # 就是返回self._wrapped is not empty,当前是否已经初始化好了settings
             # Start the auto-reloading dev server even if the code is broken.
             # The hardcoded condition is a code smell but we can't rely on a
             # flag on the command class because we haven't located it yet.
             if subcommand == 'runserver' and '--noreload' not in self.argv:
                 try:
+                    # 执行django.setup,如果有错误那么
                     autoreload.check_errors(django.setup)()
                 except Exception:
                     # The exception will be raised later in the child process
@@ -344,6 +357,7 @@ class ManagementUtility:
 
             # In all other cases, django.setup() is required to succeed.
             else:
+                # 执行django.setup
                 django.setup()
 
         self.autocomplete()
@@ -362,6 +376,37 @@ class ManagementUtility:
         elif self.argv[1:] in (['--help'], ['-h']):
             sys.stdout.write(self.main_help_text() + '\n')
         else:
+            # 这里执行fetch_command('runserver').run_from_argv(['/Users/mering/Proje...manage.py', 'runserver', '--noreload', '--nothreading'])
+            # runserver 对应的是django.contrib.staticfiles
+            # 加载该class import_module('%s.management.commands.%s' % (app_name, name))
+            # import_module('django.contrib.staticfiles.management.commands.runserver')
+            # 放回的fetch_command(subcommand)=django.contrib.staticfiles.management.commands.runserver.Command()
+            # django.contrib.staticfiles.management.commands.runserver.Command继承自django.core.management.Command,
+            # run_from_argv会调用django.core.management.Command.excute-->django.core.management.BaseCommand.excute
+            # django.core.management.commands.runserver.Command.handle
+            # django.core.management.commands.runserver.Command.run
+            # django.core.management.commands.runserver.Command.inner_run
+            # django.contrib.staticfiles.management.commands.runserver.Command.get_handler  获得wsgiapp
+            #  Debug模式下返回StaticFilesHandler
+            # django.core.servers.run
+            # def run(addr, port, wsgi_handler, ipv6=False, threading=False, server_cls=WSGIServer):
+            #     server_address = (addr, port)
+            #     if threading:
+            #         # 创建一个新类型继承自socketserver.ThreadingMixIn和WSGIServer
+            #         httpd_cls = type('WSGIServer', (socketserver.ThreadingMixIn, server_cls), {})
+            #     else:
+            #         httpd_cls = server_cls
+            #     httpd = httpd_cls(server_address, WSGIRequestHandler, ipv6=ipv6)
+            #     if threading:
+            #         # ThreadingMixIn.daemon_threads indicates how threads will behave on an
+            #         # abrupt shutdown; like quitting the server by the user or restarting
+            #         # by the auto-reloader. True means the server will not wait for thread
+            #         # termination before it quits. This will make auto-reloader faster
+            #         # and will prevent the need to kill the server manually if a thread
+            #         # isn't terminating correctly.
+            #         httpd.daemon_threads = True
+            #     httpd.set_app(wsgi_handler)
+            #     httpd.serve_forever()
             self.fetch_command(subcommand).run_from_argv(self.argv)
 
 
