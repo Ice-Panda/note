@@ -10,8 +10,8 @@ XMLHttpRequest 是一个 API，它为客户端提供了在客户端和服务器�
 
 XMLHttpRequest 最初由微软设计，随后被 Mozilla、Apple 和 Google采纳。如今，该对象已经被 W3C组织标准化。 通过它，你可以很容易的取回一个 URL 上的资源数据。尽管名字里有 XML，但 XMLHttpRequest 可以取回所有类型的数据资源，并不局限于 XML。而且除了 HTTP ，它还支持 file 和 ftp 协议
 
-## readyState 
 
+## readyState
 返回xhr当前所处的状态
 
 ### UNSENT 0
@@ -26,9 +26,8 @@ send() 方法已经被调用，响应头也已经被接收。
 ### LOADING 3
 响应体部分正在被接收。如果 responseType 属性是“text”或空字符串， responseText 将会在载入的过程中拥有部分响应数据。
 
-### DONE
+### DONE 4
 请求操作已经完成。这意味着数据传输已经彻底完成或失败。
-
 
 ## response 
 属性返回响应的正文
@@ -45,40 +44,26 @@ send() 方法已经被调用，响应头也已经被接收。
 ## statusText
 返回响应的状态码说明
 
-
-
 ## timeout
-
 设置响应的超时时间,秒单位;如果超时了,会触发超时时间,通过绑定的ontimeout函数来处理
-
-
 
 ## abort() 方法
 
 取消请求,通常和超时一起使用
 
 ## getAllResponseHeaders() 方法
-
 返回所有的响应头
 
 ## setRequestHeader(key,value) 方法
-
 设置请求头
-
 
 ## onreadystatechange 绑定回调函数
 只要 readyState 属性发生变化，就会调用相应的处理函数
 
-
 ## ontimeout 绑定回调函数
-
 当超时事件触发
 
-## onabort 绑定回调函数
-
-abort事件触发
-
-## onprogress 绑定回调函数
+## upload.onprogress 绑定回调函数
 
 在请求过程中不断触发,请求的进度事件,常用于向服务器发送大量数据时,检测已经发送的数据量;例如跟踪文件上传进度条。
 
@@ -129,7 +114,7 @@ xhr.ontimeout = function (e) {
   console.log('超时了')
   xhr.abort()
 };
-xhr.onprogress=function(event){
+xhr.upload.onprogress=function(event){
     console.log(event.loaded)
     console.log(event.loaded)
 }
