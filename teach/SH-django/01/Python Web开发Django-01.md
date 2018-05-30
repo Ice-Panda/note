@@ -5,7 +5,7 @@
 #### 一、基础知识
 
 - C/S与B/S
-- HTTP
+- 服务器处理请求的流程
 - django框架
 - MVC
 - django的MTV
@@ -33,26 +33,8 @@
 
 ### HTTP
 
-超文本传输协议（HTTP，HyperText Transfer Protocol) 是互联网上应用最为广泛的一种网络协议。互联网从传输简单问文字，网页只包含文字，到包含多媒体。
-
-#### HTTP协议与TCP/IP协议什么关系
-
-常见网络协议分层：
-1. 应用层：SSH、FTP...
-2. 传输层：TCP、UDP ...
-3. 网络层：IP ...
-4. 数据链路层：WIFI ...
-5. 物理层：光纤等物理设备 ...
-
-HTTP协议建立在TCP/IP基础之上，属于应用层协议。
-
-#### HTTP协议的特点
-
-1. 过程:请求--->响应
-    > 客户端与服务器建立起连接，客户端发送数据给服务器，服务器接收到数据，并进行相关处理，然后向客户端发送数据
-2. 生命周期短:
-    > 当客户端接收到服务器返回的数据后就会断开连接，或者服务器在发送完数据后，就断开连接
-    > 每次客户端需要发送给服务器时都要重新再次建立连接，数据发送完成后再次断开连接
+超文本传输协议（HTTP，HyperText Transfer Protocol) 是互联网上应用最为广泛的一种网络协议。互联网从传输简单问文字，网页只包含文字，到包含多媒体。  
+目前使用的版本是HTTP 1.1
 
 #### URL
 
@@ -65,47 +47,9 @@ HTTP协议建立在TCP/IP基础之上，属于应用层协议。
 
 > 类似于电话号码，通过电话号码找到某个人，电话号码具有一定的格式
 
-> 抽象到一个公司层面，服务器就相当于前台，path相当于要找某个人。
+### 服务器处理请求的流程
 
-#### HTTP报文（HTTP协议内容格式）
-
-> 类似于一本书，有作者，书名，内容等等
-
-HTTP报文分为两类
-- 请求报文：由客户端发起请求信息
-- 响应报文：服务器对客户端的请求进行处理后，返回的响应信息
-
-报文格式：
-- 起始行：在请求报文中说明要做什么，在响应报文中说明出现什么情况
-- 头部：零个或多个头部，每个头部作为一行，由名称和值构成，格式是：`头部名称:值`
-- 主体：通常是请求数据，或者响应数据，也可以没有主体
-
-##### 请求报文
-
-分为三部分：
-1. 请求起始行：`method path version`，例如：`GET /images/photo.png HTTP/1.1`
-2. 请求头：`key:value`，例如：`Host: www.baidu.com`
-3. 请求主体: 发送给服务器的数据，例如：表单数据，文件，json数据
-
-常见起始行请求方法:
-- GET
-- POST
-- PUT
-- DELETE
-
-##### 响应报文
-
-1. 响应起始行：`version status reason-phrase`，例如：`HTTP/1.1 200 OK`
-2. 响应头： `key:value`，例如：`Content-Type: application/json`
-3. 响应主体：服务器起返回的数据，例如：网页文件，图片，json数据
-
-常见状态码：
-- 200：成功
-- 302：重定向
-- 404：找不到
-- 500：服务器发生错误
-
-##### 使用chrome浏览器查看请求报文和响应报文
+请求-->路由-->业务处理函数-->数据库-->网页-->返回给客户端
 
 ### django框架
 
@@ -113,7 +57,7 @@ HTTP报文分为两类
 
 - 从2005初步完成，是开源框架
 - 重量级的python Web开发框架，内置了大量的模块工具
-- 使用的是MVC的思想
+- 使用的是MVC的设计思想
 
 ### MVC
 
@@ -151,6 +95,8 @@ sudo apt-get install python3-pip
 
 # 切换到home目录下
 cd ~
+mkdir DjangoProjects
+cd DjangoProjects
 
 # python虚拟换件管理工具
 sudo pip3 install virtualenv
@@ -159,7 +105,7 @@ sudo pip3 install virtualenv
 virtualenv -p python3 .djenv
 
 # 启动虚拟环境
-source ~/.djenv/bin/activate
+source ~/DjangoProjects/.djenv/bin/activate
 
 # 退出虚拟环境
 deactivate
@@ -167,7 +113,11 @@ deactivate
 # 配置启动虚拟环境命令别名
 vim ~/.bashrc
 # 尾部添加
-# alias djenv=‘source ~/.djenv/bin/activate’
+# alias djenv=‘source ~/home/u/DjangoProjects/.djenv/bin/activate’
+```
+
+```shell
+sudo apt-get install mysql-server
 ```
 
 ```shell
@@ -175,7 +125,18 @@ vim ~/.bashrc
 djenv
 # 安装django库
 pip install django==1.11
-# 新建w项目
+
+# 安装pylint-django
+pip install pylint-django
+
+# 安装pymysql
+pip install mysqlclient
+# 安装失败需要安装 sudo apt-get install python3-dev libmysqlclient-dev
+
+# 查看已经安装的包
+pip freeze
+
+# 新建项目
 django-admin startproject Django01
 # 启动服务器
 cd Django01

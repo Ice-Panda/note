@@ -110,10 +110,6 @@ DATABASES = {
 }
 ```
 
-#### 安装连接mysql的python库
-
-`pip install pymysql`
-
 ### 迁移数据表
 
 ```shell
