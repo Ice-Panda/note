@@ -2,74 +2,24 @@
 
 ## 课程内容
 
-#### 一、开发环境搭建
-- ubuntu桌面版虚拟机安装
-- 安装Python3
-- 使用pyvenv安装虚拟环境
+#### 一、基础知识
 
-#### 二、基础知识
 - C/S与B/S
-- HTTP协议
+- HTTP
 - django框架
 - MVC
 - django的MTV
 
-#### 三、项目构建
+#### 二、项目构建
 - 搭建项目
 - 启动服务器
 - django请求流程
 
-#### 四、项目目录结构
+#### 三、项目目录结构
 
-#### 五、自定义路由与请求处理函数
+#### 四、自定义路由与请求处理函数
 
-
-## 一、开发环境搭建
-
-### ubuntu桌面版虚拟机安装  
-
-推荐使用Virutalbox安装ubuntu虚拟机，VirualBox占用更少的系统资源
-
-- 使用vmware或者Virutalbox安装ubuntu桌面版16.04
-- 给虚拟机分配2G以上内存，以及多个cpu
-- 选择ubuntu 阿里云软件源
-
-### 安装python3 
-```shell
-# 更新软件
-sudo apt-get update
-
-# 安装python3
-sudo apt-get install python3
-
-# 安装python3 pip
-sudo apt-get install python3-pip
-```
-
-### 安装虚拟环境
-```shell
-# 切换到home目录下
-cd ~
-
-# python虚拟换件管理工具
-sudo pip3 install virtualenv
-
-# 创建虚拟环境
-virtualenv -p python3 .djenv
-
-# 启动虚拟环境
-source ~/.djenv/bin/activate
-
-# 退出虚拟环境
-deactivate
-
-# 配置启动虚拟环境命令别名
-vim ~/.bashrc
-# 尾部添加
-# alias djenv=‘source ~/.djenv/bin/activate’
-```
-
-## 二、基础知识
+## 一、基础知识
 
 ### C/S与B/S
 
@@ -79,17 +29,11 @@ vim ~/.bashrc
 
 浏览器是最常见的客户端，几乎所有平台上（安卓，Ios，Windows，MacOS，Linux，树莓派等嵌入设备）都有浏览器。
 
-### HTTP协议
+> 单机到客户端与服务器,发展历史
 
-#### URL
+### HTTP
 
-统一资源定位符，用于定位网络上某个资源，通过URL可以访问到对应的网络资源。
-
-常见格式：scheme://domain/path
-- scheme：协议，例如：http、https、ftp
-- domain：服务器地址，格式:`域名或者IP:端口号`。例如：127.0.0.1:8000；www.baidu.com
-- path：资源路径，指明要访问的资源在服务器上的位置。例如：/images/logo.png
-
+超文本传输协议（HTTP，HyperText Transfer Protocol) 是互联网上应用最为广泛的一种网络协议。互联网从传输简单问文字，网页只包含文字，到包含多媒体。
 
 #### HTTP协议与TCP/IP协议什么关系
 
@@ -104,10 +48,28 @@ HTTP协议建立在TCP/IP基础之上，属于应用层协议。
 
 #### HTTP协议的特点
 
-1. 客户端与服务器建立起连接，客户端发送数据给服务器，服务器接收到数据，并进行相关处理，然后向客户端发送数据，当客户端接收到服务器返回的数据后就会断开连接，或者服务器在发送完数据后，就断开连接
-2. 每次客户端需要发送给服务器时都要重新再次建立连接，数据发送完成后再次断开连接
+1. 过程:请求--->响应
+    > 客户端与服务器建立起连接，客户端发送数据给服务器，服务器接收到数据，并进行相关处理，然后向客户端发送数据
+2. 生命周期短:
+    > 当客户端接收到服务器返回的数据后就会断开连接，或者服务器在发送完数据后，就断开连接
+    > 每次客户端需要发送给服务器时都要重新再次建立连接，数据发送完成后再次断开连接
+
+#### URL
+
+统一资源定位符，用于定位网络上某个资源，通过URL可以访问到对应的网络资源。
+
+常见格式：scheme://domain/path
+- scheme：协议，例如：http、https、ftp
+- domain：服务器地址，格式:`域名或者IP:端口号`。例如：127.0.0.1:8000；www.baidu.com
+- path：资源路径，指明要访问的资源在服务器上的位置。例如：/images/logo.png
+
+> 类似于电话号码，通过电话号码找到某个人，电话号码具有一定的格式
+
+> 抽象到一个公司层面，服务器就相当于前台，path相当于要找某个人。
 
 #### HTTP报文（HTTP协议内容格式）
+
+> 类似于一本书，有作者，书名，内容等等
 
 HTTP报文分为两类
 - 请求报文：由客户端发起请求信息
@@ -132,6 +94,7 @@ HTTP报文分为两类
 - DELETE
 
 ##### 响应报文
+
 1. 响应起始行：`version status reason-phrase`，例如：`HTTP/1.1 200 OK`
 2. 响应头： `key:value`，例如：`Content-Type: application/json`
 3. 响应主体：服务器起返回的数据，例如：网页文件，图片，json数据
@@ -154,6 +117,9 @@ HTTP报文分为两类
 
 ### MVC
 
+> 分工合作：盖房子，砌墙工，和水泥，砖头供应  
+> web开发中类似于盖房子，但是分为数据模型，视图，控制器  
+
 全名是Model View Controller。是一种软件设计思想，用于将业务逻辑、数据、界面显示分离。
 
 - model 模型：用于管理业务数据，例如：数据库的增删改查
@@ -170,6 +136,39 @@ django使用的是MVC思想。使用MTV方式来实现MVC思想：
 
 
 ## 三、项目构建
+
+### 安装虚拟环境
+
+```shell
+# 更新软件
+sudo apt-get update
+
+# 安装python3
+sudo apt-get install python3
+
+# 安装python3 pip
+sudo apt-get install python3-pip
+
+# 切换到home目录下
+cd ~
+
+# python虚拟换件管理工具
+sudo pip3 install virtualenv
+
+# 创建虚拟环境
+virtualenv -p python3 .djenv
+
+# 启动虚拟环境
+source ~/.djenv/bin/activate
+
+# 退出虚拟环境
+deactivate
+
+# 配置启动虚拟环境命令别名
+vim ~/.bashrc
+# 尾部添加
+# alias djenv=‘source ~/.djenv/bin/activate’
+```
 
 ```shell
 # 启动虚拟环境
@@ -240,12 +239,12 @@ MyApp/
 - tests.py：测试文件
 - **views.py**：视图处理函数文件
 
-## 五、请求处理函数并绑定路由
+## 五、创建请求处理函数并绑定路由
 
 ### 在views新建视图处理函数
 
 视图处理函数格式
-```
+```python
 def hello_world(request):
     # 处理过程
     return HttpResponse('')
@@ -254,7 +253,7 @@ def hello_world(request):
 
 ### 绑定路由
 
-```
+```python
 from MyApp.views import hello_wolrd
 
 urlpatterns = [
@@ -268,6 +267,22 @@ urlpatterns = [
 
 `127.0.0.1:8000/hello_world`
 
+### 子路由
+
+> 园区-->楼-->几层
+> 
+> 或者一家公司，前台-->分机号-->人
+
+```python
+from django.conf.urls import include
+from MyApp.views import hello_wolrd
+from MyApp import urls as myapp_urls
+
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+    url(r'^hello_world/', include(myapp_urls)),
+]
+```
 
 
 
