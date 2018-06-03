@@ -5,7 +5,6 @@
 #### 一、基础知识
 
 - C/S与B/S
-- 服务器处理请求的流程
 - django框架
 - MVC
 - django的MTV
@@ -18,6 +17,8 @@
 #### 三、项目目录结构
 
 #### 四、自定义路由与请求处理函数
+
+#### 作业
 
 ## 一、基础知识
 
@@ -79,7 +80,7 @@ django使用的是MVC思想。使用MTV方式来实现MVC思想：
 - V:view 控制器，用处理用户请求，返回响应数据。
 
 
-## 三、项目构建
+## 二、项目构建
 
 ### 安装虚拟环境
 
@@ -109,16 +110,13 @@ source ~/DjangoProjects/.djenv/bin/activate
 
 # 退出虚拟环境
 deactivate
-
 # 配置启动虚拟环境命令别名
 vim ~/.bashrc
 # 尾部添加
 # alias djenv=‘source ~/home/u/DjangoProjects/.djenv/bin/activate’
 ```
 
-```shell
-sudo apt-get install mysql-server
-```
+
 
 ```shell
 # 启动虚拟环境
@@ -128,10 +126,6 @@ pip install django==1.11
 
 # 安装pylint-django
 pip install pylint-django
-
-# 安装pymysql
-pip install mysqlclient
-# 安装失败需要安装 sudo apt-get install python3-dev libmysqlclient-dev
 
 # 查看已经安装的包
 pip freeze
@@ -144,12 +138,6 @@ cd Django01
 # 打开浏览器访问 127.0.0.1:8000
 ```
 
-### Django请求流程
-
-请求-->路由-->处理函数-->数据库操作-->渲染模板-->返回响应数据
-
-- 请求由客户端发起
-- 路由负责对客户端发起的请求进行解析,找到对应的处理函数,
 
 ## 四、项目目录结构
 
@@ -177,6 +165,15 @@ Django01项目文件夹
 - ROOT_URLCONF：根路由文件
 - TEMPLATES：模板引擎配置信息
 - DATABASES：数据库配置信息
+
+### Django请求流程
+
+请求-->路由-->处理函数-->数据库操作-->渲染模板-->返回响应数据
+
+> 类似于一家门厂。客户：想要买门。接单客服:接待客户。库房：找到对应的门。客服安排发货。
+
+- 请求由客户端发起
+- 路由负责对客户端发起的请求进行解析,找到对应的处理函数
 
 ### 新建应用
 
@@ -244,6 +241,23 @@ urlpatterns = [
     url(r'^hello_world/', include(myapp_urls)),
 ]
 ```
+
+## 作业
+
+新建一个后台管理的应用，用于管理产品，订单，用户，客服。通过后台首页进入到对应的管理页面。
+
+使用子路由来实现。
+
+页面：
+
+- 后台首页
+- 产品管理
+- 订单管理
+- 用户管理
+- 客服管理
+
+
+
 
 
 
