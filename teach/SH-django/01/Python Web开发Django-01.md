@@ -10,6 +10,7 @@
 - django的MTV
 
 #### 二、项目构建
+- 环境
 - 搭建项目
 - 启动服务器
 - django请求流程
@@ -82,6 +83,10 @@ django使用的是MVC思想。使用MTV方式来实现MVC思想：
 
 ## 二、项目构建
 
+### 环境
+
+ubuntu 16.04+python3 或者 MacOS 10+
+
 ### 安装虚拟环境
 
 ```shell
@@ -115,8 +120,6 @@ vim ~/.bashrc
 # 尾部添加
 # alias djenv=‘source ~/home/u/DjangoProjects/.djenv/bin/activate’
 ```
-
-
 
 ```shell
 # 启动虚拟环境
