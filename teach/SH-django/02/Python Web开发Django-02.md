@@ -96,6 +96,11 @@ class ClassRoom(models.Model):
 
 创建数据库 `create database django01 character set=utf8;`
 
+#### 安装连接mysql库
+
+- sudo apt-get install python3-dev libmysqlclient-dev
+- pip install mysqlclient
+
 
 #### 在settings.py中修改默认的数据库
 
@@ -271,7 +276,6 @@ ClassRoom.objects.filter(...).update(...)
 #### 删除多条数据
 
 ClassRoom.objects.filter(...).delete()
-
 
 
 ## 作业

@@ -33,3 +33,14 @@ WSGI里的组件分为『Server』，『Middleware』和『Application』三种�
 
 
 A WSGI server (meaning WSGI compliant) only receives the request from the client, pass it to the application and then send the response returned by the application to the client. It does nothing else,All the gory details must be supplied by the application or middleware.
+
+
+# WSGI python内置库实现web服务器
+
+```python
+def application(environ, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return '<h1>Hello, web!</h1>'
+#environ包含所有的请求信息
+#start_response,用于向客户端返回信息
+```
