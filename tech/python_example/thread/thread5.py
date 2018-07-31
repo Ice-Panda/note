@@ -5,15 +5,20 @@ __author__ = 'mering Gao'
 # 或者希望线程工作到一半时终止而不损失或破坏数据,对于这些服务,使用守护线程就很有用,
 # 要标志一个线程位守护线程,需要调用妻setDeamon()方法并提供参数True,默认情况下线程不作为守护线程
 import threading,time,logging
+import subprocess
 logging.basicConfig(level=logging.DEBUG,format='%(levelname)s (%(threadName)-10s) %(message)s',)
 
 def daemon():
     logging.debug('Starting')
-    time.sleep(2)
+    for i in range(10):
+        f=open('/tmp/test','a')
+        f.write(str(i))
+        f.write('\n')
+        time.sleep(1)
+        f.close()
     logging.debug('Exiting')
 
-d=threading.Thread(target=daemon,name='daemon')
-d.setDaemon(True)
+d=threading.Thread(target=daemon,name='daemon',daemon=True)
 
 def non_daemon():
     logging.debug('Starting')

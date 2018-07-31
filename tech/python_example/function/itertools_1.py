@@ -55,6 +55,5 @@ for i in i1:
 print('i2:', i2)
 for i in i2:
     print(i)
-
 print()
 

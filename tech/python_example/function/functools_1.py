@@ -29,7 +29,6 @@ myfunc('a', 3)
 print()
 
 p1 = functools.partial(myfunc, b=4)
-print(dir(p1))
 showdetials('partial with named default', p1, True)
 p1('passing a')
 p1('override b', b=5)
